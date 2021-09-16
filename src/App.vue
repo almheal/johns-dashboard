@@ -38,6 +38,7 @@ export default {
   mounted() {
     if (getLocalStorage(USER_TOKEN_NAME)) {
       this.auth();
+      console.log("gg");
     }
   },
 };
