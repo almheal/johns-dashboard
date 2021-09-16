@@ -1,5 +1,5 @@
 <template>
-  <component :is="layout">
+  <component :is="layout" v-if="showApp">
     <router-view />
   </component>
   <the-notification
@@ -10,6 +10,7 @@
 
 <script>
 import EmptyLayout from "@/layouts/EmptyLayout";
+import DefaultLayout from "@/layouts/DefaultLayout";
 import TheNotification from "@/components/TheNotification";
 import { getLocalStorage } from "@/utils";
 import { USER_TOKEN_NAME } from "@/consts";
@@ -19,8 +20,12 @@ export default {
   name: "App",
   components: {
     EmptyLayout,
+    DefaultLayout,
     TheNotification,
   },
+  data: () => ({
+    showApp: false,
+  }),
   computed: {
     ...mapGetters({
       getNotifications: "notification/getNotifications",
@@ -35,11 +40,11 @@ export default {
       auth: "user/auth",
     }),
   },
-  mounted() {
+  async mounted() {
     if (getLocalStorage(USER_TOKEN_NAME)) {
-      this.auth();
-      console.log("gg");
+      await this.auth();
     }
+    this.showApp = true;
   },
 };
 </script>
