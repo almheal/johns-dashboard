@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <the-sidebar />
-    <router-view />
+    <router-view class="layout__body" />
   </div>
 </template>
 
@@ -20,5 +20,10 @@ export default {
 .layout {
   display: flex;
   min-height: 100vh;
+
+  &__body {
+    flex: 1 1 0;
+    padding: 24px 32px;
+  }
 }
 </style>

@@ -38,12 +38,15 @@ export default {
     ...mapActions({
       removeNotification: "notification/removeNotification",
       auth: "user/auth",
+      getAllLocales: "locale/getAllItems",
     }),
   },
   async mounted() {
+    await this.getAllLocales();
     if (getLocalStorage(USER_TOKEN_NAME)) {
       await this.auth();
     }
+
     this.showApp = true;
   },
 };

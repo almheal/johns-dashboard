@@ -21,7 +21,7 @@ const genericCrudStore = (url) => {
       },
       addNewItem(state, item) {
         state.items.push(item);
-      }
+      },
     },
     actions: {
       async createItem({ commit }, body) {
