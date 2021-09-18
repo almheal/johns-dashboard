@@ -91,12 +91,11 @@ export default {
       if (!this.validate(this.user)) {
         return;
       }
-      try {
-        await this.login(this.user);
-        this.$router.push("/");
-      } catch (err) {
-        return err;
+      const result = await this.login(this.user);
+      if (result && result.messageCodes) {
+        return;
       }
+      this.$router.push("/");
     },
   },
 };

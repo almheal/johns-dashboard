@@ -10,6 +10,18 @@ const routes = [
     component: () => import("../views/Home"),
   },
   {
+    path: "/locales",
+    name: "Locales",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/Locales"),
+  },
+  {
+    path: "/locale-messages/:id",
+    name: "LocaleMessages",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/LocaleMessages"),
+  },
+  {
     path: "/login",
     name: "Login",
     meta: { layout: "EmptyLayout", auth: false },

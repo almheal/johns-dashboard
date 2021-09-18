@@ -7,10 +7,12 @@ const genericCrudStore = (url) => {
     state: {
       items: [],
       item: {},
+      loader: false,
     },
     getters: {
       getItems: ({ items }) => items,
       getItem: ({ item }) => item,
+      getLoader: ({ loader }) => loader,
     },
     mutations: {
       setItems(state, items) {
@@ -21,15 +23,22 @@ const genericCrudStore = (url) => {
       },
       addNewItem(state, item) {
         state.items.push(item);
-      }
+      },
+      setLoader(state, value) {
+        state.loader = value;
+      },
     },
     actions: {
       async createItem({ commit }, body) {
         try {
+          commit("setLoader", true);
           const { data } = await service.create(body);
           commit("addNewItem", data);
+          return data;
         } catch (messageCodes) {
-          return Promise.reject(messageCodes);
+          return { messageCodes };
+        } finally {
+          commit("setLoader", false);
         }
       },
       async getAllItems({ commit }) {
@@ -37,19 +46,21 @@ const genericCrudStore = (url) => {
           const { data } = await service.getAll();
           commit("setItems", data);
         } catch (messageCodes) {
-          return Promise.reject(messageCodes);
+          return { messageCodes };
         }
       },
       async getItem({ commit }, id) {
         try {
           const { data } = await service.get(id);
           commit("addNewItem", data);
+          return data;
         } catch (messageCodes) {
-          return Promise.reject(messageCodes);
+          return { messageCodes };
         }
       },
       async updateItem({ commit, getters }, { id, body }) {
         try {
+          commit("setLoader", true);
           const { data } = await service.update(id, body);
           const items = getters.getItems;
 
@@ -61,19 +72,25 @@ const genericCrudStore = (url) => {
             }
           });
           commit("setItems", updatedItems);
+          return data;
         } catch (messageCodes) {
-          return Promise.reject(messageCodes);
+          return { messageCodes };
+        } finally {
+          commit("setLoader", false);
         }
       },
-      async delete({ commit, getters }, id) {
+      async deleteItem({ commit, getters }, id) {
         try {
+          commit("setLoader", true);
           const { data } = await service.delete(id);
           const items = getters.getItems;
 
           const updatedItems = items.filter((item) => item._id !== data._id);
           commit("setItems", updatedItems);
         } catch (messageCodes) {
-          return Promise.reject(messageCodes);
+          return { messageCodes };
+        } finally {
+          commit("setLoader", false);
         }
       },
     },

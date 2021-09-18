@@ -5,19 +5,24 @@ import { notificationHandler } from "./notificationHandler";
 import { SUCCESS_MESSAGE_CODES } from "../../consts/success";
 
 function setUserToken(response) {
-  const { data } = response;
+  const { data: body } = response;
   const STATUS_CREATED = 201;
 
-  if (data.token) {
-    setLocalStorage({ key: USER_TOKEN_NAME, data: response.data.token });
+  if (body.token) {
+    response.data = { user: body.user };
+    setLocalStorage({ key: USER_TOKEN_NAME, data: body.token });
   }
 
-  if (response.status === STATUS_CREATED && !data.message) {
+  if (response.status === STATUS_CREATED && !body.message) {
     notificationHandler([SUCCESS_MESSAGE_CODES.CREATED]);
   }
 
-  if (data.message) {
-    notificationHandler(data.message);
+  if (body.message) {
+    notificationHandler(body.message);
+  }
+
+  if (body.data) {
+    response.data = body.data;
   }
 
   return response;

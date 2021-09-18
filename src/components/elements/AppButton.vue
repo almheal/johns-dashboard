@@ -7,7 +7,7 @@
     @click="$emit('clickButton')"
   >
     <app-circle-loader class="app-button__loader" v-if="loading" />
-    {{ text }}
+    {{ $t(text) }}
   </button>
 </template>
 

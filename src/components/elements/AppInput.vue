@@ -1,10 +1,11 @@
 <template>
   <div class="input-wrapper">
-    <label :for="dynamicId" class="input__label">{{ label }}</label>
+    <label :for="dynamicId" class="input__label" v-if="label">{{
+      label
+    }}</label>
     <input
       :type="typeInput"
       class="input"
-      :id="dynamicId"
       :value="modelValue"
       :placeholder="placeholder"
       @input="$emit('update:modelValue', $event.target.value)"
@@ -53,7 +54,7 @@ export default {
 }
 
 .input {
-  display: block;
+  display: inline-block;
   font-size: 16px;
   width: 100%;
   padding: 10px;
