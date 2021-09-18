@@ -94,15 +94,15 @@ export default {
 
     &:hover {
       .app-modal__icon {
-        color: rgb(239, 68, 68);
+        fill: rgb(239, 68, 68);
       }
     }
   }
 
   &__icon {
-    width: 24px;
-    height: 24px;
-    transition: color 0.3s;
+    width: 16px;
+    height: 16px;
+    transition: fill 0.3s;
   }
 
   &__text {

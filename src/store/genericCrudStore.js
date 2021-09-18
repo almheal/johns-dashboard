@@ -72,6 +72,7 @@ const genericCrudStore = (url) => {
             }
           });
           commit("setItems", updatedItems);
+          return data;
         } catch (messageCodes) {
           return { messageCodes };
         } finally {

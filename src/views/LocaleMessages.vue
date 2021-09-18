@@ -2,7 +2,7 @@
   <div class="locale-messages">
     <div class="locale-messages__header">
       <h1 class="locale-messages__title">
-        {{ `${$t("admin.editor.title")} "${getCurrentLocale.title}"` }}
+        {{ `${$t("admin.editor.title")} "${routeLocale.title}"` }}
       </h1>
       <app-button
         text="admin.utils.edit"
@@ -56,6 +56,11 @@ export default {
     getCurrentLocaleMessages() {
       return this.getLocaleMessages.find(
         (localeMessages) => localeMessages._id === this.$route.params.id
+      );
+    },
+    routeLocale() {
+      return this.getLocales.find(
+        (locale) => locale.messages === this.$route.params.id
       );
     },
   },

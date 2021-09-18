@@ -1,18 +1,28 @@
 <template>
   <div class="locales">
     <div class="locales__inner">
-      <div class="locales__actions">
-        <form class="locales__create" @submit.prevent="createLocaleHandler">
+      <h1 class="locales__title">{{ $t("admin.menu.locales") }}</h1>
+      <div class="locales__header">
+        <form class="locales__create" @submit.prevent="localeHandler">
           <app-input
             placeholder="Название локали"
             v-model="locale.title"
             :error="errors.title"
+            ref="titleInput"
           />
           <app-button
             class="locales__button"
-            text="Добавить"
+            :text="!editItemId ? `Добавить` : `Редактировать`"
             :loading="localeLoader"
             buttonType="submit"
+          />
+          <app-button
+            class="locales__button"
+            v-if="editItemId"
+            text="Отмена"
+            :loading="localeLoader"
+            buttonType="button"
+            @clickButton="resetEdit"
           />
         </form>
       </div>
@@ -21,7 +31,9 @@
         :rows="rows"
         :isNumeration="true"
         :cross="true"
+        :edit="true"
         @clickCross="deleteLocaleHandler"
+        @clickEdit="editLocaleHandler"
         @clickOnRow="toLocaleMessages"
       />
     </div>
@@ -64,6 +76,7 @@ export default {
     },
     isModal: false,
     deleteItem: {},
+    editItemId: null,
   }),
   computed: {
     ...mapGetters({
@@ -109,6 +122,7 @@ export default {
     ...mapActions({
       deleteLocale: "locale/deleteItem",
       createLocale: "locale/createItem",
+      updateLocale: "locale/updateItem",
       createLocaleMessages: "localeMessages/createItem",
     }),
     async deleteLocaleHandler(row = {}) {
@@ -121,17 +135,44 @@ export default {
       await this.deleteLocale(this.deleteItem._id);
       this.closeModal();
     },
+    editLocaleHandler(row = {}) {
+      this.editItemId = row.item._id;
+      this.locale.title = row.item.title;
+    },
+    resetEdit() {
+      this.editItemId = null;
+      this.locale.title = "";
+    },
     closeModal() {
       this.deleteItem = {};
       this.isModal = false;
     },
-    async createLocaleHandler() {
+    async localeHandler() {
       if (!this.locale.title) {
         this.errors.title = "Пуст";
         return;
       }
-      await this.createLocale(this.locale);
+
+      if (this.editItemId) {
+        const { messageCodes } = await this.updateLocale({
+          id: this.editItemId,
+          body: this.locale,
+        });
+
+        if (!messageCodes) {
+          this.locale.title = "";
+          this.resetEdit();
+        }
+        return;
+      }
+
+      const { messageCodes } = await this.createLocale(this.locale);
+
+      if (!messageCodes) {
+        this.locale.title = "";
+      }
     },
+
     toLocaleMessages({ item }) {
       if (!item.messages) {
         return;
@@ -145,10 +186,14 @@ export default {
 
 <style lang="scss" scoped>
 .locales {
-  &__actions {
+  &__header {
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
+  }
+
+  &__title {
+    font-size: 24px;
   }
 
   &__create {

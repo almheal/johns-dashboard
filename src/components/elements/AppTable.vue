@@ -10,7 +10,7 @@
         >
           {{ column.title }}
         </th>
-        <th class="app-table__head" v-if="cross"></th>
+        <th class="app-table__head" v-if="cross || edit"></th>
       </tr>
     </thead>
     <tbody class="app-table__body">
@@ -19,6 +19,7 @@
         :class="{
           'app-table__row_grey-hover': row.hover,
           'app-table__row_clickable': row.clickable,
+          'app-table__row_is-active': row.active,
         }"
         v-for="(row, index) in rows"
         :key="index"
@@ -32,12 +33,23 @@
         >
           {{ cell.title }}
         </td>
-        <td
-          class="app-table__cell app-table__cell-cross"
-          v-if="cross"
-          @click.stop="$emit('clickCross', row)"
-        >
-          <app-cross-icon class="app-table__cross" />
+        <td class="app-table__cell app-table__cell_icons" v-if="cross || edit">
+          <div class="app-table__icons">
+            <div
+              class="app-table__icon app-table__icon_edit"
+              v-if="edit"
+              @click.stop="$emit('clickEdit', row)"
+            >
+              <app-edit-icon class="app-table__edit" />
+            </div>
+            <div
+              class="app-table__icon"
+              v-if="cross"
+              @click.stop="$emit('clickCross', row)"
+            >
+              <app-cross-icon class="app-table__cross" />
+            </div>
+          </div>
         </td>
       </tr>
     </tbody>
@@ -46,11 +58,13 @@
 
 <script>
 import AppCrossIcon from "@/components/icons/AppCrossIcon";
+import AppEditIcon from "@/components/icons/AppEditIcon";
 
 export default {
   name: "AppTable",
   components: {
     AppCrossIcon,
+    AppEditIcon,
   },
   props: {
     columns: {
@@ -66,6 +80,10 @@ export default {
       default: false,
     },
     cross: {
+      type: Boolean,
+      default: false,
+    },
+    edit: {
       type: Boolean,
       default: false,
     },
@@ -103,31 +121,59 @@ export default {
     &_clickable {
       cursor: pointer;
     }
+
+    &_is-active {
+      background-color: rgb(229, 231, 235);
+    }
   }
 
   &__cell {
-    padding: 16px 24px;
+    padding: 12px 16px;
     border-top: 1px solid rgb(229, 231, 235);
     border-bottom: 1px solid rgb(229, 231, 235);
     overflow: hidden;
     background-color: #fff;
     transition: background-color 0.3s;
 
-    &-cross {
-      width: 35px;
+    &_icons {
+      padding: 0 16px;
+      width: 76px;
+    }
+  }
 
-      &:hover {
-        .app-table__cross {
-          color: rgb(239, 68, 68);
-        }
+  &__icons {
+    display: flex;
+    align-items: center;
+  }
+
+  &__icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 41px;
+    width: 38px;
+
+    &:hover {
+      .app-table__cross {
+        fill: rgb(239, 68, 68);
+      }
+      .app-table__edit {
+        fill: #4f46e5;
       }
     }
   }
 
   &__cross {
-    width: 24px;
-    height: 24px;
-    transition: color 0.3s;
+    width: 14px;
+    height: 14px;
+    transition: fill 0.3s;
+  }
+
+  &__edit {
+    width: 18px;
+    height: 18px;
+
+    transition: fill 0.3s;
   }
 }
 </style>
