@@ -16,8 +16,8 @@ export default {
 .app-loader {
   display: inline-block;
   position: relative;
-  width: 33px;
-  height: 33px;
+  width: 32px;
+  height: 32px;
 
   &__item {
     box-sizing: border-box;
@@ -26,7 +26,7 @@ export default {
     width: 26px;
     height: 26px;
     margin: 4px;
-    border: 4px solid #fff;
+    border: 3px solid #fff;
     border-radius: 50%;
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     border-color: #fff transparent transparent transparent;

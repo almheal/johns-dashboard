@@ -6,27 +6,30 @@
         <h4 class="logo__title">Dashboard</h4>
       </router-link>
       <navigation-menu :menu="menu" />
+      <dropdown-language class="sidebar__language" />
     </div>
   </div>
 </template>
 
 <script>
 import NavigationMenu from "@/components/NavigationMenu";
+import DropdownLanguage from "@/components/language/DropdownLanguage";
 
 export default {
   name: "TheSidebar",
   components: {
     NavigationMenu,
+    DropdownLanguage,
   },
   data: () => ({
     menu: [
       {
-        name: "Главная",
+        name: "admin.menu.main",
         icon: "AppDashboardIcon",
         link: "/",
       },
       {
-        name: "Локали",
+        name: "admin.menu.locales",
         link: "/locales",
         icon: "AppTranslationIcon",
       },
@@ -46,6 +49,11 @@ export default {
 
   &__inner {
     padding: 28px 0;
+    height: 100%;
+  }
+
+  &__language {
+    margin: 16px 24px 0;
   }
 }
 

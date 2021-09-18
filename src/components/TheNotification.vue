@@ -65,6 +65,7 @@ export default {
     background-color: #fff;
     border-radius: 7px;
     margin-bottom: 15px;
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.3);
 
     &:last-child {
       margin-bottom: 0;

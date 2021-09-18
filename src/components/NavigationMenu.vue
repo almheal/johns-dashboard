@@ -9,7 +9,7 @@
         @click="clickOnItem(item)"
       >
         <component class="menu__icon" :is="item.icon"></component>
-        <span>{{ item.name }}</span>
+        <span>{{ $t(item.name) }}</span>
       </li>
     </ul>
   </nav>

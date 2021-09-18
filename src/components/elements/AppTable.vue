@@ -10,6 +10,7 @@
         >
           {{ column.title }}
         </th>
+        <th class="app-table__head" v-if="cross"></th>
       </tr>
     </thead>
     <tbody class="app-table__body">
@@ -21,6 +22,7 @@
         }"
         v-for="(row, index) in rows"
         :key="index"
+        @click="$emit('clickOnRow', row)"
       >
         <td class="app-table__cell" v-if="isNumeration">{{ index + 1 }}</td>
         <td
@@ -30,14 +32,26 @@
         >
           {{ cell.title }}
         </td>
+        <td
+          class="app-table__cell app-table__cell-cross"
+          v-if="cross"
+          @click.stop="$emit('clickCross', row)"
+        >
+          <app-cross-icon class="app-table__cross" />
+        </td>
       </tr>
     </tbody>
   </table>
 </template>
 
 <script>
+import AppCrossIcon from "@/components/icons/AppCrossIcon";
+
 export default {
   name: "AppTable",
+  components: {
+    AppCrossIcon,
+  },
   props: {
     columns: {
       type: Array,
@@ -51,6 +65,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    cross: {
+      type: Boolean,
+      default: false,
+    },
   },
 };
 </script>
@@ -59,27 +77,26 @@ export default {
 .app-table {
   width: 100%;
   border-collapse: collapse;
-  box-shadow: 1px 1px 3px 0px rgba(#000, 0.6);
+  box-shadow: 0px 1px 3px 0px rgba(#000, 0.1);
   border-radius: 6px;
   overflow: hidden;
   text-align: left;
   font-size: 16px;
 
   &__head {
-    background-color: rgb(55, 48, 163);
+    background-color: rgb(243, 244, 246);
     padding: 12px 20px;
-    color: #fff;
+    color: rgb(75, 85, 99);
     font-weight: 400;
     overflow: hidden;
   }
 
   &__row {
-    transition: 0.3s;
-
     &_grey-hover {
       &:hover {
-        background-color: rgb(229, 231, 235);
-        transition: 0.3s;
+        .app-table__cell {
+          background-color: rgb(229, 231, 235);
+        }
       }
     }
 
@@ -90,8 +107,27 @@ export default {
 
   &__cell {
     padding: 16px 24px;
+    border-top: 1px solid rgb(229, 231, 235);
     border-bottom: 1px solid rgb(229, 231, 235);
     overflow: hidden;
+    background-color: #fff;
+    transition: background-color 0.3s;
+
+    &-cross {
+      width: 35px;
+
+      &:hover {
+        .app-table__cross {
+          color: rgb(239, 68, 68);
+        }
+      }
+    }
+  }
+
+  &__cross {
+    width: 24px;
+    height: 24px;
+    transition: color 0.3s;
   }
 }
 </style>

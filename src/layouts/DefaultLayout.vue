@@ -20,10 +20,11 @@ export default {
 .layout {
   display: flex;
   min-height: 100vh;
+  background-color: rgb(229, 231, 235);
 
   &__body {
     flex: 1 1 0;
-    padding: 24px 32px;
+    padding: 32px 40px;
   }
 }
 </style>

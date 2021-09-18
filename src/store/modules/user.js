@@ -26,7 +26,7 @@ const actions = {
       const { data } = await loginUser(body);
       commit("setUser", data.user);
     } catch (messageCodes) {
-      return Promise.reject(messageCodes);
+      return { messageCodes };
     } finally {
       commit("setLoading", false);
     }
@@ -36,7 +36,7 @@ const actions = {
       const { data } = await authUser();
       commit("setUser", data);
     } catch (messageCodes) {
-      return Promise.reject(messageCodes);
+      return { messageCodes };
     }
   },
 };
