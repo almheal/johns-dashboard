@@ -5,21 +5,20 @@
       <div class="locales__header">
         <form class="locales__create" @submit.prevent="localeHandler">
           <app-input
-            placeholder="Название локали"
+            :placeholder="$t('admin.createLocale.localeTitle')"
             v-model="locale.title"
             :error="errors.title"
-            ref="titleInput"
           />
           <app-button
             class="locales__button"
-            :text="!editItemId ? `Добавить` : `Редактировать`"
+            :text="!editItemId ? `admin.utils.add` : `admin.utils.edit`"
             :loading="localeLoader"
             buttonType="submit"
           />
           <app-button
             class="locales__button"
             v-if="editItemId"
-            text="Отмена"
+            text="admin.utils.cancel"
             :loading="localeLoader"
             buttonType="button"
             @clickButton="resetEdit"
@@ -40,8 +39,8 @@
     <app-information-modal
       v-if="isModal"
       :close="closeModal"
-      title="Подтверждение удаления"
-      text="Вы действительно хотите удалить?"
+      title="admin.confirmDelete.title"
+      :text="`${$t('admin.confirmDelete.text')}?`"
       :buttons="modalButtons"
     />
   </div>
@@ -68,7 +67,7 @@ export default {
     },
     columns: [
       {
-        title: "Название",
+        title: "admin.utils.title",
       },
     ],
     errors: {
@@ -86,11 +85,11 @@ export default {
     modalButtons() {
       return [
         {
-          text: "Отмена",
+          text: "admin.utils.cancel",
           fn: this.closeModal,
         },
         {
-          text: "Подтвердить",
+          text: "admin.utils.confirm",
           loading: this.localeLoader,
           fn: this.deleteLocaleHandler,
         },

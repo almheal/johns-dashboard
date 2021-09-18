@@ -2,24 +2,31 @@
   <div class="login">
     <div class="container">
       <div class="login__inner">
-        <h1 class="login__title">Welcome!</h1>
+        <h1 class="login__title">{{ $t("admin.login.welcome") }}</h1>
         <form class="login-form" @submit.prevent="loginHandler">
-          <h3 class="login-form__title">Login</h3>
+          <h3 class="login-form__title">{{ $t("admin.login.title") }}</h3>
           <div class="login-form__body">
-            <app-input label="Name" v-model="user.name" :error="errors.name" />
             <app-input
-              label="Password"
+              label="admin.login.username"
+              v-model="user.name"
+              :error="errors.name"
+            />
+            <app-input
+              label="admin.login.password"
               typeInput="password"
               v-model="user.password"
               :error="errors.password"
             />
           </div>
-          <app-button
-            class="login-form__button"
-            text="Login"
-            buttonType="submit"
-            :loading="getLoader"
-          />
+          <div class="login-form__actions">
+            <dropdown-language />
+            <app-button
+              class="login-form__button"
+              text="admin.login.login"
+              buttonType="submit"
+              :loading="getLoader"
+            />
+          </div>
         </form>
       </div>
     </div>
@@ -29,6 +36,7 @@
 <script>
 import AppInput from "@/components/elements/AppInput";
 import AppButton from "@/components/elements/AppButton";
+import DropdownLanguage from "@/components/language/DropdownLanguage";
 import { mapActions, mapGetters } from "vuex";
 
 export default {
@@ -36,6 +44,7 @@ export default {
   components: {
     AppInput,
     AppButton,
+    DropdownLanguage,
   },
   data: () => ({
     user: {
@@ -136,8 +145,10 @@ export default {
       margin-bottom: 25px;
     }
 
-    &__button {
-      margin: 0 0 0 auto;
+    &__actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
   }
 }

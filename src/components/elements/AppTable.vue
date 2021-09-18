@@ -8,7 +8,7 @@
           v-for="(column, index) in columns"
           :key="index"
         >
-          {{ column.title }}
+          {{ $t(column.title) }}
         </th>
         <th class="app-table__head" v-if="cross || edit"></th>
       </tr>
@@ -31,7 +31,7 @@
           v-for="(cell, index) in row.cells"
           :key="index"
         >
-          {{ cell.title }}
+          {{ $t(cell.title) }}
         </td>
         <td class="app-table__cell app-table__cell_icons" v-if="cross || edit">
           <div class="app-table__icons">
@@ -128,7 +128,7 @@ export default {
   }
 
   &__cell {
-    padding: 12px 16px;
+    padding: 12px 20px;
     border-top: 1px solid rgb(229, 231, 235);
     border-bottom: 1px solid rgb(229, 231, 235);
     overflow: hidden;
@@ -136,7 +136,7 @@ export default {
     transition: background-color 0.3s;
 
     &_icons {
-      padding: 0 16px;
+      padding: 0 20px;
       width: 76px;
     }
   }

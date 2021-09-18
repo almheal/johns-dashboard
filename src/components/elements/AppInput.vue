@@ -1,7 +1,7 @@
 <template>
   <div class="input-wrapper">
     <label :for="dynamicId" class="input__label" v-if="label">{{
-      label
+      $t(label)
     }}</label>
     <input
       :type="typeInput"
@@ -10,7 +10,7 @@
       :placeholder="placeholder"
       @input="$emit('update:modelValue', $event.target.value)"
     />
-    <div class="input__error" v-if="error">{{ error }}</div>
+    <div class="input__error" v-if="error">{{ $t(error) }}</div>
   </div>
 </template>
 
