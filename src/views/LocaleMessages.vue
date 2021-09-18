@@ -48,13 +48,13 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getLocaleMessages: "localeMessages/getItems",
+      getAllLocaleMessages: "localeMessages/getItems",
       getLoader: "localeMessages/getLoader",
       getLocales: "locale/getItems",
       getCurrentLocale: "locale/getItem",
     }),
     getCurrentLocaleMessages() {
-      return this.getLocaleMessages.find(
+      return this.getAllLocaleMessages.find(
         (localeMessages) => localeMessages._id === this.$route.params.id
       );
     },
@@ -66,6 +66,7 @@ export default {
   },
   methods: {
     ...mapActions({
+      getLocaleMessages: "localeMessages/getItem",
       updateLocaleMessages: "localeMessages/updateItem",
     }),
     async editLocaleMessages() {
@@ -88,7 +89,10 @@ export default {
       }
     },
   },
-  mounted() {
+  async mounted() {
+    if (!this.getCurrentLocaleMessages) {
+      await this.getLocaleMessages(this.$route.params.id);
+    }
     this.messages = this.getCurrentLocaleMessages
       ? JSON.stringify(
           JSON.parse(this.getCurrentLocaleMessages.messages),
