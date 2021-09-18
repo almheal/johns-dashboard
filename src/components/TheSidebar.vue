@@ -1,12 +1,15 @@
 <template>
   <div class="sidebar">
     <div class="sidebar__inner">
-      <router-link class="logo" to="/">
-        <img class="logo__img" src="../assets/img/logo.svg" alt="logo" />
-        <h4 class="logo__title">Dashboard</h4>
-      </router-link>
-      <navigation-menu :menu="menu" />
-      <dropdown-language class="sidebar__language" />
+      <div class="sidebar__body">
+        <router-link class="logo" to="/">
+          <img class="logo__img" src="../assets/img/logo.svg" alt="logo" />
+          <h4 class="logo__title">Dashboard</h4>
+        </router-link>
+        <navigation-menu :menu="menu" />
+        <dropdown-language class="sidebar__language" />
+      </div>
+      <button class="logout" @click="logout">{{ $t("admin.logout") }}</button>
     </div>
   </div>
 </template>
@@ -14,6 +17,8 @@
 <script>
 import NavigationMenu from "@/components/NavigationMenu";
 import DropdownLanguage from "@/components/language/DropdownLanguage";
+import { setLocalStorage } from "@/utils";
+import { USER_TOKEN_NAME } from "@/consts";
 
 export default {
   name: "TheSidebar",
@@ -35,6 +40,12 @@ export default {
       },
     ],
   }),
+  methods: {
+    logout() {
+      setLocalStorage({ key: USER_TOKEN_NAME, data: "" });
+      this.$router.push("/login");
+    },
+  },
 };
 </script>
 
@@ -48,6 +59,9 @@ export default {
   height: 100vh;
 
   &__inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     padding: 28px 0;
     height: 100%;
   }
@@ -74,6 +88,18 @@ export default {
     font-weight: 600;
     color: #fff;
     margin-left: 15px;
+  }
+}
+
+.logout {
+  padding: 10px 24px;
+  background-color: transparent;
+  color: #6b7280;
+  font-size: 16px;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #fff;
   }
 }
 </style>
