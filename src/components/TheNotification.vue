@@ -5,7 +5,6 @@
       :class="{ error: notification.isError, success: !notification.isError }"
       v-for="(notification, index) in notifications"
       :key="index"
-      @click="$emit('closeNotification', notification.id)"
     >
       <div class="notification__icon">
         <app-danger-icon class="icon" v-if="notification.isError" />
@@ -17,10 +16,19 @@
         </div>
         <div class="notification__text">
           <p>
-            {{ notification.messageCode }}
+            {{
+              $t(
+                `${notification.isError ? "errors" : "success"}.${
+                  notification.messageCode
+                }`
+              )
+            }}
           </p>
         </div>
-        <button class="button-cross">
+        <button
+          class="button-cross"
+          @click="$emit('closeNotification', notification.id)"
+        >
           <app-cross-icon class="icon icon__cross" />
         </button>
       </div>
@@ -112,7 +120,7 @@ export default {
   &__title {
     font-weight: 400;
     font-size: 16px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
   }
 
   &__text {
@@ -131,18 +139,18 @@ export default {
 
   &:hover {
     .icon__cross {
-      color: rgb(239, 68, 68);
+      fill: rgb(239, 68, 68);
     }
   }
 }
 
 .icon {
-  width: 24px;
-  height: 24px;
+  width: 17px;
+  height: 17px;
   color: #fff;
 
   &__cross {
-    color: rgb(75, 85, 99);
+    fill: rgb(75, 85, 99);
     transition: color 0.2s;
   }
 }
