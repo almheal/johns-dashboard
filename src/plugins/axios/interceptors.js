@@ -21,8 +21,12 @@ function setUserToken(response) {
     notificationHandler(body.message);
   }
 
-  if (body.data) {
+  if (body.data && !body.length) {
     response.data = body.data;
+  }
+
+  if (body.data && body.length) {
+    response.data = body;
   }
 
   return response;
