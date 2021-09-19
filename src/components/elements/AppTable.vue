@@ -19,7 +19,7 @@
         :class="{
           'app-table__row_grey-hover': row.hover,
           'app-table__row_clickable': row.clickable,
-          'app-table__row_is-active': row.active,
+          'app-table__row_is-hidden': loading,
         }"
         v-for="(row, index) in rows"
         :key="index"
@@ -30,6 +30,7 @@
           class="app-table__cell"
           v-for="(cell, index) in row.cells"
           :key="index"
+          :style="{ color: cell.color ? cell.color : '' }"
         >
           {{ $t(cell.title) }}
         </td>
@@ -52,6 +53,26 @@
           </div>
         </td>
       </tr>
+      <tr class="app-table__row" v-if="!rows.length">
+        <td
+          class="app-table__cell app-table__cell_text-center"
+          :colspan="emptyColLength"
+          v-if="!loading"
+        >
+          {{ $t("admin.utils.listEmpty") }}
+        </td>
+        <td
+          class="app-table__cell app-table__cell_stub"
+          :colspan="emptyColLength"
+          v-else
+        ></td>
+      </tr>
+      <app-circle-loader
+        class="app-table__loader"
+        color="blue"
+        size="large"
+        v-if="loading"
+      />
     </tbody>
   </table>
 </template>
@@ -59,12 +80,14 @@
 <script>
 import AppCrossIcon from "@/components/icons/AppCrossIcon";
 import AppEditIcon from "@/components/icons/AppEditIcon";
+import AppCircleLoader from "@/components/elements/AppCircleLoader";
 
 export default {
   name: "AppTable",
   components: {
     AppCrossIcon,
     AppEditIcon,
+    AppCircleLoader,
   },
   props: {
     columns: {
@@ -86,6 +109,19 @@ export default {
     edit: {
       type: Boolean,
       default: false,
+    },
+    loading: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  computed: {
+    emptyColLength() {
+      let additionalCols = 0;
+      additionalCols += this.cross || this.edit ? 1 : 0;
+      additionalCols += this.isNumeration ? 1 : 0;
+
+      return this.columns.length + additionalCols;
     },
   },
 };
@@ -109,7 +145,12 @@ export default {
     overflow: hidden;
   }
 
+  &__body {
+    position: relative;
+  }
+
   &__row {
+    position: relative;
     &_grey-hover {
       &:hover {
         .app-table__cell {
@@ -122,12 +163,16 @@ export default {
       cursor: pointer;
     }
 
-    &_is-active {
-      background-color: rgb(229, 231, 235);
+    &_is-hidden {
+      background-color: #fff;
+      .app-table__cell {
+        z-index: -5;
+      }
     }
   }
 
   &__cell {
+    position: relative;
     padding: 12px 20px;
     border-top: 1px solid rgb(229, 231, 235);
     border-bottom: 1px solid rgb(229, 231, 235);
@@ -138,6 +183,14 @@ export default {
     &_icons {
       padding: 0 20px;
       width: 76px;
+    }
+
+    &_text-center {
+      text-align: center;
+    }
+
+    &_stub {
+      height: 100px;
     }
   }
 
@@ -152,6 +205,7 @@ export default {
     align-items: center;
     height: 41px;
     width: 38px;
+    cursor: pointer;
 
     &:hover {
       .app-table__cross {
@@ -161,6 +215,13 @@ export default {
         fill: #4f46e5;
       }
     }
+  }
+
+  &__loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 
   &__cross {

@@ -22,6 +22,12 @@ const routes = [
     component: () => import("../views/LocaleMessages"),
   },
   {
+    path: "/tags",
+    name: "Tags",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/Tags"),
+  },
+  {
     path: "/login",
     name: "Login",
     meta: { layout: "EmptyLayout", auth: false },

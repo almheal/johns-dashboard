@@ -19,3 +19,11 @@ export const resetObjProperties = (obj) => {
     return acc;
   }, {});
 };
+
+export const calculatePagination = ({ limit, page }) => {
+  if (page < 1 || !page) {
+    page = 1;
+  }
+  const skip = limit * page - limit;
+  return { limit, skip };
+};

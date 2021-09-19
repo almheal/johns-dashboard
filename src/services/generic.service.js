@@ -7,8 +7,8 @@ const genericService = (url) => ({
   get(id) {
     return request({ url: `${url}/${id}`, method: "get" });
   },
-  getAll() {
-    return request({ url, method: "get" });
+  getAll(query) {
+    return request({ url, method: "get", query });
   },
   update(id, body) {
     return request({ url: `${url}/${id}`, method: "put", body });

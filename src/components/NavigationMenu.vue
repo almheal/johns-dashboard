@@ -18,12 +18,14 @@
 <script>
 import AppTranslationIcon from "@/components/icons/AppTranslationIcon";
 import AppDashboardIcon from "@/components/icons/AppDashboardIcon";
+import AppTagIcon from "@/components/icons/AppTagIcon";
 
 export default {
   name: "NavigationMenu",
   components: {
     AppTranslationIcon,
     AppDashboardIcon,
+    AppTagIcon,
   },
   props: {
     menu: {

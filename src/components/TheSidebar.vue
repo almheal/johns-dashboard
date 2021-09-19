@@ -34,6 +34,11 @@ export default {
         link: "/",
       },
       {
+        name: "app.tags.title",
+        icon: "AppTagIcon",
+        link: "/tags",
+      },
+      {
         name: "admin.menu.locales",
         link: "/locales",
         icon: "AppTranslationIcon",

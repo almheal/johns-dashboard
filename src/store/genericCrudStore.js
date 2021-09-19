@@ -8,11 +8,13 @@ const genericCrudStore = (url) => {
       items: [],
       item: {},
       loader: false,
+      length: null,
     },
     getters: {
       getItems: ({ items }) => items,
       getItem: ({ item }) => item,
       getLoader: ({ loader }) => loader,
+      getLength: ({ length }) => length,
     },
     mutations: {
       setItems(state, items) {
@@ -27,13 +29,18 @@ const genericCrudStore = (url) => {
       setLoader(state, value) {
         state.loader = value;
       },
+      setLength(state, length) {
+        state.length = length;
+      },
     },
     actions: {
-      async createItem({ commit }, body) {
+      async createItem({ commit }, { body, addNew = true }) {
         try {
           commit("setLoader", true);
           const { data } = await service.create(body);
-          commit("addNewItem", data);
+          if (addNew) {
+            commit("addNewItem", data);
+          }
           return data;
         } catch (messageCodes) {
           return { messageCodes };
@@ -41,12 +48,21 @@ const genericCrudStore = (url) => {
           commit("setLoader", false);
         }
       },
-      async getAllItems({ commit }) {
+      async getAllItems({ commit }, query) {
         try {
-          const { data } = await service.getAll();
-          commit("setItems", data);
+          commit("setLoader", true);
+          const { data: body } = await service.getAll(query);
+
+          if (body.length) {
+            commit("setItems", body.data);
+            commit("setLength", body.length);
+          } else {
+            commit("setItems", body);
+          }
         } catch (messageCodes) {
           return { messageCodes };
+        } finally {
+          commit("setLoader", false);
         }
       },
       async getItem({ commit }, id) {
@@ -79,14 +95,18 @@ const genericCrudStore = (url) => {
           commit("setLoader", false);
         }
       },
-      async deleteItem({ commit, getters }, id) {
+      async deleteItem({ commit, getters }, { id, isDelete = true }) {
         try {
           commit("setLoader", true);
           const { data } = await service.delete(id);
-          const items = getters.getItems;
 
-          const updatedItems = items.filter((item) => item._id !== data._id);
-          commit("setItems", updatedItems);
+          if (isDelete) {
+            const items = getters.getItems;
+
+            const updatedItems = items.filter((item) => item._id !== data._id);
+            commit("setItems", updatedItems);
+          }
+          return data;
         } catch (messageCodes) {
           return { messageCodes };
         } finally {

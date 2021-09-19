@@ -21,7 +21,7 @@
             text="admin.utils.cancel"
             :loading="localeLoader"
             buttonType="button"
-            @clickButton="resetEdit"
+            @clickButton="resetLocale"
           />
         </form>
       </div>
@@ -131,14 +131,14 @@ export default {
         return;
       }
 
-      await this.deleteLocale(this.deleteItem._id);
+      await this.deleteLocale({ id: this.deleteItem._id });
       this.closeModal();
     },
     editLocaleHandler(row = {}) {
       this.editItemId = row.item._id;
       this.locale.title = row.item.title;
     },
-    resetEdit() {
+    resetLocale() {
       this.editItemId = null;
       this.locale.title = "";
     },
@@ -148,7 +148,7 @@ export default {
     },
     async localeHandler() {
       if (!this.locale.title) {
-        this.errors.title = "Пуст";
+        this.errors.title = "admin.errors.locale.titleEmpty";
         return;
       }
 
@@ -159,16 +159,15 @@ export default {
         });
 
         if (!messageCodes) {
-          this.locale.title = "";
-          this.resetEdit();
+          this.resetLocale();
         }
         return;
       }
 
-      const { messageCodes } = await this.createLocale(this.locale);
+      const { messageCodes } = await this.createLocale({ body: this.locale });
 
       if (!messageCodes) {
-        this.locale.title = "";
+        this.resetLocale();
       }
     },
 
