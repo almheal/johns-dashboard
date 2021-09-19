@@ -1,16 +1,24 @@
 <template>
   <div class="input-wrapper">
-    <label :for="dynamicId" class="input__label" v-if="label">{{
-      $t(label)
-    }}</label>
+    <label
+      :for="dynamicId"
+      class="input__label"
+      data-test="label"
+      v-if="label"
+      >{{ $t(label) }}</label
+    >
     <input
       :type="typeInput"
       class="input"
       :value="modelValue"
       :placeholder="placeholder"
+      data-test="input"
+      :id="dynamicId"
       @input="$emit('update:modelValue', $event.target.value)"
     />
-    <div class="input__error" v-if="error">{{ $t(error) }}</div>
+    <div class="input__error" data-test="error" v-if="error">
+      {{ $t(error) }}
+    </div>
   </div>
 </template>
 
