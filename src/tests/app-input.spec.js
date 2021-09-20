@@ -111,4 +111,15 @@ describe("AppInput", () => {
     const input = wrapper.find('[data-test="input"]');
     expect(input.attributes().id).toBeDefined();
   });
+
+  test('label attr "for" equal input id ', () => {
+    const wrapper = mountWrapper({
+      props: {
+        label: "label",
+      },
+    });
+    const input = wrapper.find('[data-test="input"]');
+    const label = wrapper.find('[data-test="label"]');
+    expect(label.attributes().for).toEqual(input.attributes().id);
+  });
 });
