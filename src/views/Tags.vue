@@ -9,6 +9,7 @@
             :placeholder="$t('admin.utils.title')"
             :error="errors.title"
             v-model="tag.title"
+            data-test="form"
           />
           <app-input
             class="tags__input"
@@ -22,6 +23,7 @@
             text="admin.utils.add"
             :loading="getLoader"
             buttonType="submit"
+            data-test-button="create"
           />
           <template v-else>
             <app-button
