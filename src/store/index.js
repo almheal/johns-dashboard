@@ -4,6 +4,7 @@ import notification from "./modules/notification";
 import locale from "./modules/locale";
 import localeMessages from "./modules/localeMessages";
 import tag from "./modules/tag";
+import ingredient from "./modules/ingredient";
 
 export default createStore({
   modules: {
@@ -12,5 +13,6 @@ export default createStore({
     locale,
     localeMessages,
     tag,
+    ingredient,
   },
 });

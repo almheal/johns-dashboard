@@ -28,6 +28,18 @@ const routes = [
     component: () => import("../views/Tags"),
   },
   {
+    path: "/ingredients",
+    name: "Ingredients",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/Ingredients"),
+  },
+  {
+    path: "/ingredients/:action",
+    name: "Ingredient",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/Ingredient"),
+  },
+  {
     path: "/login",
     name: "Login",
     meta: { layout: "EmptyLayout", auth: false },
