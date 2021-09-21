@@ -2,7 +2,13 @@
   <div class="ingredient">
     <div class="ingredient__inner">
       <h1 class="ingredient__title">
-        {{ $t("admin.createSubProduct.newIngredient") }}
+        {{
+          $t(
+            getRouteAction === "create"
+              ? "admin.newIngredient"
+              : "admin.editIngredient"
+          )
+        }}
       </h1>
       <form class="ingredient__form" @submit.prevent="ingredientActionHandler">
         <app-input
@@ -45,6 +51,7 @@
               ? 'admin.utils.create'
               : 'admin.utils.edit'
           "
+          :loading="isLoading || getLoader"
           buttonType="submit"
         />
       </form>
@@ -81,10 +88,12 @@ export default {
       icon: "",
       category: "",
     },
+    isLoading: false,
   }),
   computed: {
     ...mapGetters({
       getIngredient: "ingredient/getItem",
+      getLoader: "ingredient/getLoader",
     }),
     getRouteAction() {
       return this.$route.params.action;
@@ -160,7 +169,6 @@ export default {
     },
   },
   async mounted() {
-    console.log(this.getRouteAction);
     if (this.getRouteAction !== "create" && this.getRouteAction !== "edit") {
       this.$router.push("/ingredients");
     }
@@ -170,14 +178,15 @@ export default {
     }
 
     if (this.getRouteAction === "edit" && this.getEditId) {
+      this.isLoading = true;
       await this.getOneIngredient({
         id: this.getEditId,
         addNew: false,
         setItem: true,
       });
       this.ingredient = JSON.parse(JSON.stringify(this.getIngredient));
-      console.log(this.ingredient);
       this.previewImgIngredient = this.ingredient.icon;
+      this.isLoading = false;
     }
   },
 };

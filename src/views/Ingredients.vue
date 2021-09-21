@@ -13,6 +13,7 @@
           :cross="true"
           :edit="true"
           @clickEdit="({ item }) => toIngredient(`edit?id=${item._id}`)"
+          @clickCross="deleteIngredientHandler"
         />
         <app-pagination
           class="ingredients__pagination"
@@ -21,6 +22,13 @@
         />
       </div>
     </div>
+    <app-information-modal
+      v-if="deleteIngredientId"
+      title="admin.confirmDelete.title"
+      :text="`${$t('admin.confirmDelete.text')}?`"
+      :buttons="modalButtons"
+      :close="closeModal"
+    />
   </div>
 </template>
 
@@ -28,6 +36,7 @@
 import AppTable from "@/components/elements/AppTable";
 import AppButton from "@/components/elements/AppButton";
 import AppPagination from "@/components/elements/AppPagination";
+import AppInformationModal from "@/components/elements/AppInformationModal";
 import { calculatePagination } from "@/utils";
 import { LIMIT_ITEMS } from "@/consts";
 import { mapActions, mapGetters } from "vuex";
@@ -38,21 +47,40 @@ export default {
     AppTable,
     AppButton,
     AppPagination,
+    AppInformationModal,
   },
   data: () => ({
     columns: [
       { title: "admin.utils.title" },
       { title: "admin.utils.price" },
-      // { title: "admin.utils.icon" },
+      { title: "admin.utils.icon" },
       { title: "admin.utils.category" },
     ],
     isLoading: false,
+    deleteIngredientId: null,
   }),
   computed: {
     ...mapGetters({
       allIngredientsLength: "ingredient/getLength",
       getIngredients: "ingredient/getItems",
+      getLoader: "ingredient/getLoader",
     }),
+    currentPage() {
+      return this.$route.query.page;
+    },
+    modalButtons() {
+      return [
+        {
+          text: "admin.utils.cancel",
+          fn: this.closeModal,
+        },
+        {
+          text: "admin.utils.confirm",
+          loading: this.getLoader,
+          fn: this.deleteIngredientHandler,
+        },
+      ];
+    },
     rows() {
       return this.getIngredients.map((ingredient) => {
         return {
@@ -65,6 +93,9 @@ export default {
               title: ingredient.price,
             },
             {
+              img: ingredient.icon,
+            },
+            {
               title: ingredient.category,
             },
           ],
@@ -75,6 +106,7 @@ export default {
   methods: {
     ...mapActions({
       getAllIngredients: "ingredient/getAllItems",
+      deleteIngredient: "ingredient/deleteItem",
     }),
     async getIngredientsByLimit() {
       const { skip, limit } = calculatePagination({
@@ -86,8 +118,35 @@ export default {
       await this.getAllIngredients({ skip, limit });
       this.isLoading = false;
     },
+    async deleteIngredientHandler(row) {
+      if (!this.deleteIngredientId) {
+        this.deleteIngredientId = row.item._id;
+        return;
+      }
+
+      const { messageCodes } = await this.deleteIngredient({
+        id: this.deleteIngredientId,
+        isDelete: false,
+      });
+
+      if (this.getIngredients.length === 1 && this.currentPage > 1) {
+        await this.$router.replace({
+          query: {
+            page: this.currentPage - 1,
+          },
+        });
+      }
+
+      if (!messageCodes) {
+        this.getIngredientsByLimit();
+      }
+      this.closeModal();
+    },
     toIngredient(actionName) {
       this.$router.push(`/ingredients/${actionName}`);
+    },
+    closeModal() {
+      this.deleteIngredientId = null;
     },
   },
   mounted() {
@@ -122,7 +181,7 @@ export default {
   }
 
   &__pagination {
-    margin: 0 auto;
+    margin: 30px auto 0;
   }
 }
 </style>

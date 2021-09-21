@@ -32,7 +32,13 @@
           :key="index"
           :style="{ color: cell.color ? cell.color : '' }"
         >
-          {{ $t(cell.title) }}
+          <img
+            class="app-table__img"
+            v-if="cell.img"
+            :src="cell.img"
+            alt="table-image"
+          />
+          <span v-else>{{ $t(cell.title) }}</span>
         </td>
         <td class="app-table__cell app-table__cell_icons" v-if="cross || edit">
           <div class="app-table__icons">
@@ -192,6 +198,11 @@ export default {
     &_stub {
       height: 100px;
     }
+  }
+
+  &__img {
+    width: 35px;
+    height: 35px;
   }
 
   &__icons {

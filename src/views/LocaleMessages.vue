@@ -91,7 +91,7 @@ export default {
   },
   async mounted() {
     if (!this.getCurrentLocaleMessages) {
-      await this.getLocaleMessages(this.$route.params.id);
+      await this.getLocaleMessages({ id: this.$route.params.id });
     }
     this.messages = this.getCurrentLocaleMessages
       ? JSON.stringify(
