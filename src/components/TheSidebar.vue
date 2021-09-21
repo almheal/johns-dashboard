@@ -34,6 +34,11 @@ export default {
         link: "/",
       },
       {
+        name: "app.ingredients.title",
+        icon: "AppIngredientsIcon",
+        link: "/ingredients",
+      },
+      {
         name: "app.tags.title",
         icon: "AppTagIcon",
         link: "/tags",

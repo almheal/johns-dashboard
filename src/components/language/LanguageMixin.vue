@@ -55,7 +55,7 @@ export default {
       }
 
       if (!this.currentLocaleMessages) {
-        await this.getLocaleMessages(locale.messages);
+        await this.getLocaleMessages({ id: locale.messages });
       }
 
       this.$i18n.locale = this.getCurrentLocale.title;
