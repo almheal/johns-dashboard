@@ -40,6 +40,12 @@ const routes = [
     component: () => import("../views/Ingredient"),
   },
   {
+    path: '/features',
+    name: 'Features',
+    meta: {layout: 'DefaultLayout', auth: true},
+    component: () => import("../views/Features")
+  },
+  {
     path: "/login",
     name: "Login",
     meta: { layout: "EmptyLayout", auth: false },
