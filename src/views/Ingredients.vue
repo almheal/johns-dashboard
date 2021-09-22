@@ -109,6 +109,14 @@ export default {
       deleteIngredient: "ingredient/deleteItem",
     }),
     async getIngredientsByLimit() {
+      if (this.getIngredients.length === 1 && this.currentPage > 1) {
+        await this.$router.replace({
+          query: {
+            page: this.currentPage - 1,
+          },
+        });
+      }
+
       const { skip, limit } = calculatePagination({
         limit: LIMIT_ITEMS,
         page: this.currentPage,
@@ -124,22 +132,13 @@ export default {
         return;
       }
 
-      const { messageCodes } = await this.deleteIngredient({
+      await this.deleteIngredient({
         id: this.deleteIngredientId,
         isDelete: false,
       });
 
-      if (this.getIngredients.length === 1 && this.currentPage > 1) {
-        await this.$router.replace({
-          query: {
-            page: this.currentPage - 1,
-          },
-        });
-      }
+      this.getIngredientsByLimit();
 
-      if (!messageCodes) {
-        this.getIngredientsByLimit();
-      }
       this.closeModal();
     },
     toIngredient(actionName) {

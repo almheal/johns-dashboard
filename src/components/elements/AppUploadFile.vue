@@ -5,6 +5,7 @@
     }}</label>
     <app-button
       class="app-upload__button"
+      :class="{ 'app-upload__button_margin-bottom': error }"
       text="admin.utils.upload"
       @clickButton="triggerInput"
     />
@@ -75,7 +76,9 @@ export default {
   }
 
   &__button {
-    margin-bottom: 10px;
+    &_margin-bottom {
+      margin-bottom: 10px;
+    }
   }
 
   &__input {

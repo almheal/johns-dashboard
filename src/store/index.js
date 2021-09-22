@@ -5,6 +5,7 @@ import locale from "./modules/locale";
 import localeMessages from "./modules/localeMessages";
 import tag from "./modules/tag";
 import ingredient from "./modules/ingredient";
+import feature from "./modules/feature";
 
 export default createStore({
   modules: {
@@ -14,5 +15,6 @@ export default createStore({
     localeMessages,
     tag,
     ingredient,
+    feature,
   },
 });

@@ -1,6 +1,6 @@
 import genericCrudStore from "../genericCrudStore";
 
-const crudStore = genericCrudStore("/tags");
+const crudStore = genericCrudStore("/features");
 
 const state = () => ({
   ...crudStore.state,
