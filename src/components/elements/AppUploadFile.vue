@@ -1,12 +1,12 @@
 <template>
   <div class="app-upload">
     <label class="app-upload__label" :for="dynamicId" v-if="label">{{
-      $t(label)
+      label
     }}</label>
     <app-button
       class="app-upload__button"
       :class="{ 'app-upload__button_margin-bottom': error }"
-      text="admin.utils.upload"
+      :text="$t('admin.utils.upload')"
       @clickButton="triggerInput"
     />
     <input
@@ -14,9 +14,10 @@
       :id="dynamicId"
       type="file"
       ref="inputFile"
+      :value="modelValue"
       @change="changeInput"
     />
-    <div class="app-upload__error" v-if="error">{{ $t(error) }}</div>
+    <div class="app-upload__error" v-if="error">{{ error }}</div>
   </div>
 </template>
 
@@ -34,6 +35,10 @@ export default {
       default: "",
     },
     error: {
+      type: String,
+      default: "",
+    },
+    modelValue: {
       type: String,
       default: "",
     },
@@ -56,6 +61,7 @@ export default {
       reader.readAsDataURL(file);
 
       this.$emit("changeFile", formData);
+      this.$emit("update:modelValue", e.target.value);
     },
   },
   computed: {

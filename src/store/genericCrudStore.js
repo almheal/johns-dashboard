@@ -8,13 +8,18 @@ const genericCrudStore = (url) => {
       items: [],
       item: {},
       loader: false,
-      length: null,
+      createLoader: false,
+      getItemsLoader: false,
+      getItemLoader: false,
+      updateLoader: false,
+      deleteLoader: false,
+      lengthAllItems: 0,
     },
     getters: {
       getItems: ({ items }) => items,
       getItem: ({ item }) => item,
       getLoader: ({ loader }) => loader,
-      getLength: ({ length }) => length,
+      getLength: ({ lengthAllItems }) => lengthAllItems,
     },
     mutations: {
       setItems(state, items) {
@@ -26,47 +31,56 @@ const genericCrudStore = (url) => {
       addNewItem(state, item) {
         state.items.push(item);
       },
-      setLoader(state, value) {
-        state.loader = value;
+      setLoader(state, { property, value }) {
+        state[property] = value;
       },
-      setLength(state, length) {
-        state.length = length;
+      setLengthAllItems(state, length) {
+        state.lengthAllItems = length;
+      },
+      calculateAllItemsLength(state, { operation, value }) {
+        if (operation === "+") {
+          state.lengthAllItems = Number(state.lengthAllItems) + Number(value);
+        } else {
+          state.lengthAllItems = Number(state.lengthAllItems) - Number(value);
+        }
       },
     },
     actions: {
       async createItem({ commit }, { body, addNew = true }) {
         try {
-          commit("setLoader", true);
+          commit("setLoader", { property: "createLoader", value: true });
           const { data } = await service.create(body);
           if (addNew) {
             commit("addNewItem", data);
           }
+          commit("calculateAllItemsLength", { operation: "+", value: 1 });
           return data;
         } catch (messageCodes) {
           return { messageCodes };
         } finally {
-          commit("setLoader", false);
+          commit("setLoader", { property: "createLoader", value: false });
         }
       },
       async getAllItems({ commit }, query) {
         try {
-          commit("setLoader", true);
+          commit("setLoader", { property: "getItemsLoader", value: true });
           const { data: body } = await service.getAll(query);
 
           if (body.length) {
             commit("setItems", body.data);
-            commit("setLength", body.length);
+            commit("setLengthAllItems", body.length);
           } else {
             commit("setItems", body);
           }
         } catch (messageCodes) {
           return { messageCodes };
         } finally {
-          commit("setLoader", false);
+          commit("setLoader", { property: "getItemsLoader", value: false });
         }
       },
       async getItem({ commit }, { id, addNew = true, setItem = false }) {
         try {
+          commit("setLoader", { property: "getItemLoader", value: true });
           const { data } = await service.get(id);
           if (addNew) {
             commit("addNewItem", data);
@@ -77,11 +91,13 @@ const genericCrudStore = (url) => {
           return data;
         } catch (messageCodes) {
           return { messageCodes };
+        } finally {
+          commit("setLoader", { property: "getItemLoader", value: false });
         }
       },
       async updateItem({ commit, getters }, { id, body }) {
         try {
-          commit("setLoader", true);
+          commit("setLoader", { property: "updateLoader", value: true });
           const { data } = await service.update(id, body);
           const items = getters.getItems;
 
@@ -97,12 +113,12 @@ const genericCrudStore = (url) => {
         } catch (messageCodes) {
           return { messageCodes };
         } finally {
-          commit("setLoader", false);
+          commit("setLoader", { property: "updateLoader", value: false });
         }
       },
       async deleteItem({ commit, getters }, { id, isDelete = true }) {
         try {
-          commit("setLoader", true);
+          commit("setLoader", { property: "deleteLoader", value: true });
           const { data } = await service.delete(id);
 
           if (isDelete) {
@@ -111,11 +127,12 @@ const genericCrudStore = (url) => {
             const updatedItems = items.filter((item) => item._id !== data._id);
             commit("setItems", updatedItems);
           }
+          commit("calculateAllItemsLength", { operation: "-", value: 1 });
           return data;
         } catch (messageCodes) {
           return { messageCodes };
         } finally {
-          commit("setLoader", false);
+          commit("setLoader", { property: "deleteLoader", value: false });
         }
       },
     },

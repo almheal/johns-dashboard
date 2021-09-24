@@ -43,11 +43,19 @@ export default {
   props: {
     length: {
       type: Number,
-      default: 1,
+      default: 0,
     },
     limit: {
       type: Number,
       default: LIMIT_ITEMS,
+    },
+  },
+  watch: {
+    async length(value) {
+      if (!(value % this.limit) && this.currentPage > 1) {
+        const page = value / this.limit;
+        this.changePage(page);
+      }
     },
   },
   computed: {

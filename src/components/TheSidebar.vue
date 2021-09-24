@@ -16,7 +16,7 @@
 
 <script>
 import NavigationMenu from "@/components/NavigationMenu";
-import DropdownLanguage from "@/components/language/DropdownLanguage";
+import DropdownLanguage from "@/components/DropdownLanguage";
 import { setLocalStorage } from "@/utils";
 import { USER_TOKEN_NAME } from "@/consts";
 

@@ -5,25 +5,31 @@
       <form class="features__form" @submit.prevent="featureHandler">
         <img
           class="features__preview"
-          :src="featureImgPreview"
           v-if="featureImgPreview"
+          :src="featureImgPreview"
           alt="feature-preview"
         />
         <app-upload-file
           class="features__upload"
-          :error="errors.icon"
+          :error="$t(errors.icon)"
+          v-model="iconUrl"
           @changeFile="changeIcon"
           @preview="(preview) => (featureImgPreview = preview)"
         />
         <app-input
           :placeholder="$t('admin.utils.title')"
-          :error="errors.title"
+          :error="$t(errors.title)"
           v-model="feature.title"
           @update:modelValue="errors.title = ''"
         />
         <app-button
           class="features__button"
-          :text="editFeatureId ? 'admin.utils.edit' : 'admin.utils.add'"
+          :text="
+            editFeatureId
+              ? `${$t('admin.utils.edit')}`
+              : `${$t('admin.utils.add')}`
+          "
+          :loading="createLoader"
           buttonType="submit"
         />
       </form>
@@ -33,22 +39,22 @@
           :rows="rows"
           :cross="true"
           :edit="true"
-          :loading="isLoading"
+          :loading="getItemsLoader"
           @clickEdit="editFeatureHandler"
-          @clickCross="deleteFeatureHandler"
+          @clickCross="openDeleteModal"
         />
         <app-pagination
           class="features__pagination"
-          @changePage="getFeaturesByLimit"
           :length="featuresAllLength"
+          @changePage="getFeaturesByLimit"
         />
       </div>
     </div>
     <app-information-modal
-      v-if="deleteFeatureId"
-      title="admin.confirmDelete.title"
+      v-if="deleteItemId"
+      :buttons="buttonsModalDelete"
+      :title="$t('admin.confirmDelete.title')"
       :text="`${$t('admin.confirmDelete.text')}?`"
-      :buttons="modalButtons"
       :close="closeModal"
     />
   </div>
@@ -62,9 +68,11 @@ import AppTable from "@/components/elements/AppTable";
 import AppPagination from "@/components/elements/AppPagination";
 import AppInformationModal from "@/components/elements/AppInformationModal";
 import { requestCreateImage } from "@/services/image.service";
-import { calculatePagination } from "@/utils";
+import { calculatePagination, resetObjProperties } from "@/utils";
 import { LIMIT_ITEMS } from "@/consts";
-import { mapActions, mapGetters } from "vuex";
+import { ERRORS_MESSAGE_CODES } from "@/consts/errors";
+import { mapActions, mapGetters, mapState } from "vuex";
+import TableActionsMixin from "@/mixins/TableActionsMixin";
 
 export default {
   name: "Features",
@@ -76,29 +84,43 @@ export default {
     AppPagination,
     AppInformationModal,
   },
+  mixins: [TableActionsMixin],
   data: () => ({
     feature: {
       title: "",
       icon: "",
     },
-    columns: [{ title: "admin.utils.title" }, { title: "admin.utils.icon" }],
-    featureImgPreview: "",
-    isLoading: false,
+    iconUrl: "",
     errors: {
       title: "",
       icon: "",
     },
-    deleteFeatureId: null,
+    uploadFileIsClear: false,
+    featureImgPreview: "",
     editFeatureId: null,
   }),
   computed: {
+    ...mapState({
+      createLoader: (state) => state.feature.createLoader,
+      deleteLoader: (state) => state.feature.deleteLoader,
+      getItemsLoader: (state) => state.feature.getItemsLoader,
+      featuresAllLength: (state) => state.feature.lengthAllItems,
+    }),
     ...mapGetters({
       getFeatures: "feature/getItems",
-      getLoader: "feature/getLoader",
-      featuresAllLength: "feature/getLength",
     }),
     currentPage() {
       return this.$route.query.page;
+    },
+    columns() {
+      return [
+        {
+          title: this.$t("admin.utils.title"),
+        },
+        {
+          title: this.$t("admin.utils.icon"),
+        },
+      ];
     },
     rows() {
       return this.getFeatures.map((feature) => {
@@ -106,7 +128,7 @@ export default {
           item: feature,
           cells: [
             {
-              title: feature.title,
+              title: this.$t(feature.title),
             },
             {
               img: feature.icon,
@@ -115,40 +137,19 @@ export default {
         };
       });
     },
-    modalButtons() {
-      return [
-        {
-          text: "admin.utils.cancel",
-          fn: this.closeModal,
-        },
-        {
-          text: "admin.utils.confirm",
-          loading: this.getLoader,
-          fn: this.deleteFeatureHandler,
-        },
-      ];
-    },
   },
   methods: {
     ...mapActions({
       getAllFeatures: "feature/getAllItems",
-      deleteFeature: "feature/deleteItem",
+      deleteItem: "feature/deleteItem",
       createFeature: "feature/createItem",
       updateFeature: "feature/updateItem",
     }),
     async featureHandler() {
-      if (!this.feature.title) {
-        this.errors.title = "errors.21";
-      }
-
-      if (!this.feature.icon) {
-        this.errors.icon = "errors.22";
-      }
-
-      if (!this.feature.title || !this.feature.icon) {
+      const isValid = this.validate();
+      if (!isValid) {
         return;
       }
-
       if (typeof this.feature.icon === "object") {
         const { data: imgUrl } = await requestCreateImage(this.feature.icon);
         this.feature.icon = imgUrl;
@@ -162,23 +163,23 @@ export default {
         this.editFeatureId = null;
       } else {
         await this.createFeature({ body: this.feature, addNew: false });
+        this.getFeaturesByLimit();
       }
 
       this.resetFeature();
-      this.getFeaturesByLimit();
     },
-    async deleteFeatureHandler(row) {
-      if (!this.deleteFeatureId) {
-        this.deleteFeatureId = row.item._id;
-        return;
-      }
-
-      await this.deleteFeature({ id: this.deleteFeatureId, isDelete: false });
-      this.getFeaturesByLimit();
-      this.closeModal();
-    },
-    closeModal() {
-      this.deleteFeatureId = null;
+    validate() {
+      const validateItems = {
+        title: ERRORS_MESSAGE_CODES.FEATURE_TITLE_EMPTY,
+        icon: ERRORS_MESSAGE_CODES.FEATURE_ICON_EMPTY,
+      };
+      return Object.keys(validateItems).reduce((acc, key) => {
+        if (!this.feature[key]) {
+          acc = false;
+          this.errors[key] = `errors.${validateItems[key]}`;
+        }
+        return acc;
+      }, true);
     },
     editFeatureHandler({ item }) {
       this.feature.title = item.title;
@@ -187,31 +188,21 @@ export default {
       this.editFeatureId = item._id;
     },
     async getFeaturesByLimit() {
-      if (this.getFeatures.length === 1 && this.currentPage > 1) {
-        await this.$router.replace({
-          query: {
-            page: this.currentPage - 1,
-          },
-        });
-      }
-
       const { skip, limit } = calculatePagination({
         limit: LIMIT_ITEMS,
         page: this.currentPage,
       });
 
-      this.isLoading = true;
-      await this.getAllFeatures({ skip, limit });
-      this.isLoading = false;
+      this.getAllFeatures({ skip, limit });
     },
     changeIcon(formData) {
       this.feature.icon = formData;
       this.errors.icon = "";
     },
     resetFeature() {
-      this.feature.title = "";
-      this.feature.icon = "";
+      this.feature = resetObjProperties(this.feature);
       this.featureImgPreview = "";
+      this.iconUrl = "";
     },
   },
   mounted() {

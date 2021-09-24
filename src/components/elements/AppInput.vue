@@ -5,7 +5,7 @@
       class="input__label"
       data-test="label"
       v-if="label"
-      >{{ $t(label) }}</label
+      >{{ label }}</label
     >
     <input
       :type="typeInput"
@@ -17,7 +17,7 @@
       @input="$emit('update:modelValue', $event.target.value)"
     />
     <div class="input__error" data-test="error" v-if="error">
-      {{ $t(error) }}
+      {{ error }}
     </div>
   </div>
 </template>

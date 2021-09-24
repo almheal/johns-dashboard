@@ -12,7 +12,7 @@
 import EmptyLayout from "@/layouts/EmptyLayout";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import TheNotification from "@/components/TheNotification";
-import LanguageMixin from "@/components/language/LanguageMixin";
+import LanguageMixin from "@/mixins/LanguageMixin";
 import { getLocalStorage } from "@/utils";
 import { USER_TOKEN_NAME, LOCALE_NAME, DEFAULT_LOCALE } from "@/consts";
 import { mapActions, mapGetters, mapMutations } from "vuex";

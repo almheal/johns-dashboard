@@ -7,22 +7,24 @@
           <h3 class="login-form__title">{{ $t("admin.login.title") }}</h3>
           <div class="login-form__body">
             <app-input
-              label="admin.login.username"
+              :label="$t('admin.login.username')"
+              :error="$t(errors.name)"
               v-model="user.name"
-              :error="errors.name"
+              @update:modelValue="errors.name = ''"
             />
             <app-input
-              label="admin.login.password"
               typeInput="password"
+              :label="$t('admin.login.password')"
+              :error="$t(errors.password)"
               v-model="user.password"
-              :error="errors.password"
+              @update:modelValue="errors.password = ''"
             />
           </div>
           <div class="login-form__actions">
             <dropdown-language />
             <app-button
               class="login-form__button"
-              text="admin.login.login"
+              :text="$t('admin.login.login')"
               buttonType="submit"
               :loading="getLoader"
             />
@@ -36,7 +38,8 @@
 <script>
 import AppInput from "@/components/elements/AppInput";
 import AppButton from "@/components/elements/AppButton";
-import DropdownLanguage from "@/components/language/DropdownLanguage";
+import DropdownLanguage from "@/components/DropdownLanguage";
+import { ERRORS_MESSAGE_CODES } from "@/consts/errors";
 import { mapActions, mapGetters } from "vuex";
 
 export default {
@@ -61,18 +64,6 @@ export default {
       getLoader: "user/getLoader",
     }),
   },
-  watch: {
-    "user.name"() {
-      if (this.errors.name) {
-        this.errors.name = "";
-      }
-    },
-    "user.password"() {
-      if (this.errors.password) {
-        this.errors.password = "";
-      }
-    },
-  },
   methods: {
     ...mapActions({
       login: "user/login",
@@ -81,16 +72,16 @@ export default {
       let isValid = true;
 
       if (!user.name) {
-        this.errors.name = "Обязательное поле";
+        this.errors.name = `errors.${ERRORS_MESSAGE_CODES.NAME_EMPTY}`;
         isValid = false;
       }
       if (!user.password) {
-        this.errors.password = "Обязательное поле";
+        this.errors.password = `errors.${ERRORS_MESSAGE_CODES.PASSWORD_EMPTY}`;
         isValid = false;
       }
 
       if (user.password && user.password.length < 6) {
-        this.errors.password = "Минимальная длина 6 символов";
+        this.errors.password = `errors.${ERRORS_MESSAGE_CODES.PASSWORD_LENGTH_LESS_MIN}`;
         isValid = false;
       }
 

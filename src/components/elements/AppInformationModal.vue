@@ -2,7 +2,7 @@
   <div class="app-modal" @click.stop="close">
     <div class="app-modal__body" @click.stop>
       <div class="app-modal__header">
-        <h4 class="app-modal__title">{{ $t(title) }}</h4>
+        <h4 class="app-modal__title">{{ title }}</h4>
         <div class="app-modal__cross" @click.stop="close">
           <app-cross-icon class="app-modal__icon" />
         </div>
