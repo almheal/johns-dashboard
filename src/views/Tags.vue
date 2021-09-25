@@ -7,38 +7,33 @@
           <app-input
             class="tags__input"
             :placeholder="$t('admin.utils.title')"
-            :error="errors.title"
-            v-model="tag.title"
+            :error="$t(errors.title)"
             data-test="form"
+            v-model="tag.title"
+            @update:modelValue="errors.title = ''"
           />
           <app-input
             class="tags__input"
             :placeholder="$t('admin.utils.backgroundColor')"
-            :error="errors.backgroundColor"
+            :error="$t(errors.backgroundColor)"
             v-model="tag.backgroundColor"
+            @update:modelValue="errors.backgroundColor = ''"
           />
           <app-button
             class="tags__button"
-            v-if="!editItemId"
-            text="admin.utils.add"
-            :loading="getLoader"
+            :text="!editItemId ? $t('admin.utils.add') : $t('admin.utils.edit')"
+            :loading="createLoader || updateLoader"
             buttonType="submit"
             data-test-button="create"
           />
-          <template v-else>
-            <app-button
-              class="tags__button tags__button_margin-right"
-              text="admin.utils.edit"
-              :loading="getLoader"
-              buttonType="submit"
-            />
-            <app-button
-              class="tags__button"
-              text="admin.utils.cancel"
-              :loading="getLoader"
-              @clickButton="resetTag"
-            />
-          </template>
+
+          <app-button
+            v-if="editItemId"
+            class="tags__button tags__button_margin-left"
+            :text="$t('admin.utils.cancel')"
+            :loading="getLoader"
+            @clickButton="resetTag"
+          />
         </form>
       </div>
       <div class="tags__body">
@@ -47,22 +42,23 @@
           :rows="rows"
           :cross="true"
           :edit="true"
-          :loading="isLoading"
-          @clickCross="deleteTagHandler"
+          :loading="getItemsLoader"
+          @clickCross="openDeleteModal"
           @clickEdit="editTagHandler"
         />
         <app-pagination
           class="tags__pagination"
-          :length="tagsLength"
+          :length="tagsAllLength"
+          :limit="DEFAULT_LIMIT"
           @changePage="getTagsByLimit"
         />
       </div>
     </div>
     <app-information-modal
       v-if="deleteItemId"
-      title="admin.confirmDelete.title"
+      :title="$t('admin.confirmDelete.title')"
       :text="`${$t('admin.confirmDelete.text')}?`"
-      :buttons="modalButtons"
+      :buttons="buttonsModalDelete"
       :close="closeModal"
     />
   </div>
@@ -74,9 +70,10 @@ import AppInput from "@/components/elements/AppInput";
 import AppButton from "@/components/elements/AppButton";
 import AppInformationModal from "@/components/elements/AppInformationModal";
 import AppPagination from "@/components/elements/AppPagination";
+import TableActionsMixin from "@/mixins/TableActionsMixin";
 import { calculatePagination } from "@/utils";
-import { LIMIT_ITEMS } from "@/consts";
-import { mapActions, mapGetters } from "vuex";
+import { ERRORS_MESSAGE_CODES } from "@/consts/errors";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "Tags",
@@ -87,36 +84,44 @@ export default {
     AppInformationModal,
     AppPagination,
   },
+  mixins: [TableActionsMixin],
   data: () => ({
     tag: {
       title: "",
       backgroundColor: "",
     },
-    columns: [
-      { title: "admin.utils.title" },
-      { title: "admin.utils.backgroundColor" },
-    ],
     errors: {
       title: "",
       backgroundColor: "",
     },
-    deleteItemId: "",
+    DEFAULT_LIMIT: 15,
     editItemId: "",
-    isLoading: false,
   }),
   computed: {
-    ...mapGetters({
-      getTags: "tag/getItems",
-      tagsLength: "tag/getLength",
-      getLoader: "tag/getLoader",
+    ...mapState({
+      getItemsLoader: (state) => state.tag.getItemsLoader,
+      createLoader: (state) => state.tag.createLoader,
+      updateLoader: (state) => state.tag.updateLoader,
+      deleteLoader: (state) => state.tag.deleteLoader,
+      getTags: (state) => state.tag.items,
+      tagsAllLength: (state) => state.tag.lengthAllItems,
     }),
+    tagsByLimit() {
+      return this.getTags.slice(0, this.DEFAULT_LIMIT);
+    },
+    columns() {
+      return [
+        { title: this.$t("admin.utils.title") },
+        { title: this.$t("admin.utils.backgroundColor") },
+      ];
+    },
     rows() {
-      return this.getTags.map((tag) => {
+      return this.tagsByLimit.map((tag) => {
         return {
           item: tag,
           cells: [
             {
-              title: tag.title,
+              title: this.$t(tag.title),
             },
             {
               title: tag.backgroundColor,
@@ -129,98 +134,46 @@ export default {
     currentPage() {
       return this.$route.query.page;
     },
-    modalButtons() {
-      return [
-        {
-          text: "admin.utils.cancel",
-          fn: this.closeModal,
-        },
-        {
-          text: "admin.utils.confirm",
-          loading: this.getLoader,
-          fn: this.deleteTagHandler,
-        },
-      ];
-    },
-  },
-  watch: {
-    "tag.title"() {
-      if (this.errors.title) {
-        this.errors.title = "";
-      }
-    },
-    "tag.backgroundColor"() {
-      if (this.errors.backgroundColor) {
-        this.errors.backgroundColor = "";
-      }
-    },
   },
   methods: {
     ...mapActions({
       createTag: "tag/createItem",
-      deleteTag: "tag/deleteItem",
+      deleteItem: "tag/deleteItem",
       updateTag: "tag/updateItem",
       getAllTags: "tag/getAllItems",
     }),
-    closeModal() {
-      this.deleteItemId = false;
-    },
     async tagHandler() {
-      if (!this.tag.title) {
-        this.errors.title = "admin.errors.tag.titleEmpty";
-      }
-      if (!this.tag.backgroundColor) {
-        this.errors.backgroundColor = "admin.errors.tag.backgroundColorEmpty";
-      }
-
-      if (!this.tag.title || !this.tag.backgroundColor) {
+      const isValid = this.validate();
+      if (!isValid) {
         return;
       }
 
       if (this.editItemId) {
-        const { messageCodes } = await this.updateTag({
+        await this.updateTag({
           id: this.editItemId,
           body: this.tag,
         });
-
-        if (!messageCodes) {
-          this.resetTag();
-        }
-        return;
+      } else {
+        await this.createTag({
+          body: this.tag,
+        });
       }
 
-      const { messageCodes } = await this.createTag({
-        body: this.tag,
-        addNew: false,
-      });
-
-      if (!messageCodes) {
-        this.resetTag();
-      }
-      this.getTagsByLimit();
+      this.resetTag();
     },
-    async deleteTagHandler(row) {
-      if (!this.deleteItemId) {
-        this.deleteItemId = row.item._id;
-        return;
-      }
+    validate() {
+      const errors = {
+        title: `errors.${ERRORS_MESSAGE_CODES.TAG_TITLE_EMPTY}`,
+        backgroundColor: `errors.${ERRORS_MESSAGE_CODES.TAG_BACKGOUND_COLOR_EMPTY}`,
+      };
 
-      const { messageCodes } = await this.deleteTag({
-        id: this.deleteItemId,
-        isDelete: false,
-      });
-
-      if (!messageCodes) {
-        if (this.getTags.length === 1 && this.currentPage > 1) {
-          await this.$router.replace({
-            query: {
-              page: this.currentPage - 1,
-            },
-          });
+      return Object.keys(errors).reduce((acc, key) => {
+        if (!this.tag[key]) {
+          this.errors[key] = errors[key];
+          acc = false;
         }
-        this.getTagsByLimit();
-      }
-      this.closeModal();
+        return acc;
+      }, true);
     },
     editTagHandler({ item }) {
       this.editItemId = item._id;
@@ -232,15 +185,13 @@ export default {
       this.tag.title = "";
       this.tag.backgroundColor = "";
     },
-    async getTagsByLimit() {
+    getTagsByLimit() {
       const { skip, limit } = calculatePagination({
-        limit: LIMIT_ITEMS,
+        limit: this.DEFAULT_LIMIT,
         page: this.currentPage,
       });
 
-      this.isLoading = true;
-      await this.getAllTags({ skip, limit });
-      this.isLoading = false;
+      this.getAllTags({ skip, limit });
     },
   },
   mounted() {
@@ -286,8 +237,8 @@ export default {
   &__button {
     margin-top: 12px;
 
-    &_margin-right {
-      margin-right: 10px;
+    &_margin-left {
+      margin-left: 10px;
     }
   }
 }

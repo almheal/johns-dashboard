@@ -6,20 +6,20 @@
         <form class="locales__create" @submit.prevent="localeHandler">
           <app-input
             :placeholder="$t('admin.createLocale.localeTitle')"
+            :error="$t(errors.title)"
             v-model="locale.title"
-            :error="errors.title"
+            @update:modelValue="errors.title = ''"
           />
           <app-button
             class="locales__button"
-            :text="!editItemId ? `admin.utils.add` : `admin.utils.edit`"
-            :loading="localeLoader"
+            :text="!editItemId ? $t('admin.utils.add') : $t('admin.utils.edit')"
+            :loading="createLoader || updateLoader"
             buttonType="submit"
           />
           <app-button
             class="locales__button"
             v-if="editItemId"
-            text="admin.utils.cancel"
-            :loading="localeLoader"
+            :text="$t('admin.utils.cancel')"
             buttonType="button"
             @clickButton="resetLocale"
           />
@@ -31,17 +31,17 @@
         :isNumeration="true"
         :cross="true"
         :edit="true"
-        @clickCross="deleteLocaleHandler"
+        @clickCross="openDeleteModal"
         @clickEdit="editLocaleHandler"
         @clickOnRow="toLocaleMessages"
       />
     </div>
     <app-information-modal
-      v-if="isModal"
+      v-if="deleteItemId"
+      :title="$t('admin.confirmDelete.title')"
       :close="closeModal"
-      title="admin.confirmDelete.title"
       :text="`${$t('admin.confirmDelete.text')}?`"
-      :buttons="modalButtons"
+      :buttons="buttonsModalDelete"
     />
   </div>
 </template>
@@ -51,7 +51,9 @@ import AppTable from "@/components/elements/AppTable";
 import AppButton from "@/components/elements/AppButton";
 import AppInput from "@/components/elements/AppInput";
 import AppInformationModal from "@/components/elements/AppInformationModal";
-import { mapGetters, mapActions } from "vuex";
+import TableActionsMixin from "@/mixins/TableActionsMixin";
+import { ERRORS_MESSAGE_CODES } from "@/consts/errors";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "Locales",
@@ -61,37 +63,27 @@ export default {
     AppInput,
     AppInformationModal,
   },
+  mixins: [TableActionsMixin],
   data: () => ({
     locale: {
       title: "",
     },
-    columns: [
-      {
-        title: "admin.utils.title",
-      },
-    ],
     errors: {
       title: "",
     },
-    isModal: false,
-    deleteItem: {},
     editItemId: null,
   }),
   computed: {
-    ...mapGetters({
-      getLocales: "locale/getItems",
-      localeLoader: "locale/getLoader",
+    ...mapState({
+      createLoader: (state) => state.locale.createLoader,
+      updateLoader: (state) => state.locale.updateLoader,
+      deleteLoader: (state) => state.locale.deleteLoader,
+      getLocales: (state) => state.locale.items,
     }),
-    modalButtons() {
+    columns() {
       return [
         {
-          text: "admin.utils.cancel",
-          fn: this.closeModal,
-        },
-        {
-          text: "admin.utils.confirm",
-          loading: this.localeLoader,
-          fn: this.deleteLocaleHandler,
+          title: this.$t("admin.utils.title"),
         },
       ];
     },
@@ -110,30 +102,13 @@ export default {
       });
     },
   },
-  watch: {
-    "locale.title"() {
-      if (this.errors.title) {
-        this.errors.title = "";
-      }
-    },
-  },
   methods: {
     ...mapActions({
-      deleteLocale: "locale/deleteItem",
+      deleteItem: "locale/deleteItem",
       createLocale: "locale/createItem",
       updateLocale: "locale/updateItem",
       createLocaleMessages: "localeMessages/createItem",
     }),
-    async deleteLocaleHandler(row = {}) {
-      if (!this.isModal) {
-        this.deleteItem = row.item;
-        this.isModal = true;
-        return;
-      }
-
-      await this.deleteLocale({ id: this.deleteItem._id });
-      this.closeModal();
-    },
     editLocaleHandler(row = {}) {
       this.editItemId = row.item._id;
       this.locale.title = row.item.title;
@@ -142,35 +117,36 @@ export default {
       this.editItemId = null;
       this.locale.title = "";
     },
-    closeModal() {
-      this.deleteItem = {};
-      this.isModal = false;
-    },
     async localeHandler() {
-      if (!this.locale.title) {
-        this.errors.title = "admin.errors.locale.titleEmpty";
+      const isValid = this.validate();
+      if (!isValid) {
         return;
       }
 
       if (this.editItemId) {
-        const { messageCodes } = await this.updateLocale({
+        await this.updateLocale({
           id: this.editItemId,
           body: this.locale,
         });
-
-        if (!messageCodes) {
-          this.resetLocale();
-        }
-        return;
+      } else {
+        await this.createLocale({ body: this.locale });
       }
 
-      const { messageCodes } = await this.createLocale({ body: this.locale });
-
-      if (!messageCodes) {
-        this.resetLocale();
-      }
+      this.resetLocale();
     },
 
+    validate() {
+      const errors = {
+        title: `errors.${ERRORS_MESSAGE_CODES.LOCALE_TITLE_EMPTY}`,
+      };
+      return Object.keys(errors).reduce((acc, key) => {
+        if (!this.locale[key]) {
+          this.errors[key] = errors[key];
+          acc = false;
+        }
+        return acc;
+      }, true);
+    },
     toLocaleMessages({ item }) {
       if (!item.messages) {
         return;

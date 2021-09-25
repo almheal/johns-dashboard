@@ -29,8 +29,14 @@
               ? `${$t('admin.utils.edit')}`
               : `${$t('admin.utils.add')}`
           "
-          :loading="createLoader"
+          :loading="createLoader || updateLoader"
           buttonType="submit"
+        />
+        <app-button
+          class="features__button"
+          v-if="editFeatureId"
+          :text="$t('admin.utils.cancel')"
+          @clickButton="resetFeature"
         />
       </form>
       <div class="features__body">
@@ -46,6 +52,7 @@
         <app-pagination
           class="features__pagination"
           :length="featuresAllLength"
+          :limit="DEFAULT_LIMIT"
           @changePage="getFeaturesByLimit"
         />
       </div>
@@ -71,7 +78,7 @@ import { requestCreateImage } from "@/services/image.service";
 import { calculatePagination, resetObjProperties } from "@/utils";
 import { LIMIT_ITEMS } from "@/consts";
 import { ERRORS_MESSAGE_CODES } from "@/consts/errors";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 import TableActionsMixin from "@/mixins/TableActionsMixin";
 
 export default {
@@ -95,6 +102,7 @@ export default {
       title: "",
       icon: "",
     },
+    DEFAULT_LIMIT: 10,
     uploadFileIsClear: false,
     featureImgPreview: "",
     editFeatureId: null,
@@ -103,14 +111,16 @@ export default {
     ...mapState({
       createLoader: (state) => state.feature.createLoader,
       deleteLoader: (state) => state.feature.deleteLoader,
+      updateLoader: (state) => state.feature.updateLoader,
       getItemsLoader: (state) => state.feature.getItemsLoader,
       featuresAllLength: (state) => state.feature.lengthAllItems,
-    }),
-    ...mapGetters({
-      getFeatures: "feature/getItems",
+      getFeatures: (state) => state.feature.items,
     }),
     currentPage() {
       return this.$route.query.page;
+    },
+    featuresByLimit() {
+      return this.getFeatures.slice(0, LIMIT_ITEMS);
     },
     columns() {
       return [
@@ -150,23 +160,27 @@ export default {
       if (!isValid) {
         return;
       }
-      if (typeof this.feature.icon === "object") {
-        const { data: imgUrl } = await requestCreateImage(this.feature.icon);
-        this.feature.icon = imgUrl;
-      }
 
-      if (this.editFeatureId) {
-        await this.updateFeature({
-          id: this.editFeatureId,
-          body: this.feature,
-        });
-        this.editFeatureId = null;
-      } else {
-        await this.createFeature({ body: this.feature, addNew: false });
-        this.getFeaturesByLimit();
-      }
+      try {
+        if (typeof this.feature.icon === "object") {
+          const { data: imgUrl } = await requestCreateImage(this.feature.icon);
+          this.feature.icon = imgUrl;
+        }
 
-      this.resetFeature();
+        if (this.editFeatureId) {
+          await this.updateFeature({
+            id: this.editFeatureId,
+            body: this.feature,
+          });
+          this.editFeatureId = null;
+        } else {
+          await this.createFeature({ body: this.feature });
+        }
+
+        this.resetFeature();
+      } catch (err) {
+        console.log(err);
+      }
     },
     validate() {
       const validateItems = {
@@ -187,9 +201,9 @@ export default {
       this.featureImgPreview = item.icon;
       this.editFeatureId = item._id;
     },
-    async getFeaturesByLimit() {
+    getFeaturesByLimit() {
       const { skip, limit } = calculatePagination({
-        limit: LIMIT_ITEMS,
+        limit: this.DEFAULT_LIMIT,
         page: this.currentPage,
       });
 
@@ -203,6 +217,7 @@ export default {
       this.feature = resetObjProperties(this.feature);
       this.featureImgPreview = "";
       this.iconUrl = "";
+      this.editFeatureId = null;
     },
   },
   mounted() {
