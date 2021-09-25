@@ -34,6 +34,11 @@ export default {
         link: "/",
       },
       {
+        name: "admin.menu.category",
+        icon: "AppCategoriesIcon",
+        link: "/categories",
+      },
+      {
         name: "app.ingredients.title",
         icon: "AppIngredientsIcon",
         link: "/ingredients",

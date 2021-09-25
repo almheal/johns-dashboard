@@ -26,6 +26,7 @@ import AppButton from "@/components/elements/AppButton";
 
 export default {
   name: "AppUploadFile",
+  emits: ["changeFile", "preview", "update:modelValue"],
   components: {
     AppButton,
   },

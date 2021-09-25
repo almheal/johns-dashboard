@@ -21,6 +21,7 @@ import AppDashboardIcon from "@/components/icons/AppDashboardIcon";
 import AppTagIcon from "@/components/icons/AppTagIcon";
 import AppIngredientsIcon from "@/components/icons/AppIngredientsIcon";
 import AppFeaturesIcon from "@/components/icons/AppFeaturesIcon";
+import AppCategoriesIcon from "@/components/icons/AppCategoriesIcon";
 
 export default {
   name: "NavigationMenu",
@@ -30,6 +31,7 @@ export default {
     AppTagIcon,
     AppIngredientsIcon,
     AppFeaturesIcon,
+    AppCategoriesIcon,
   },
   props: {
     menu: {

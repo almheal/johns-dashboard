@@ -6,6 +6,7 @@ import localeMessages from "./modules/localeMessages";
 import tag from "./modules/tag";
 import ingredient from "./modules/ingredient";
 import feature from "./modules/feature";
+import category from "./modules/category";
 
 export default createStore({
   modules: {
@@ -16,5 +17,6 @@ export default createStore({
     tag,
     ingredient,
     feature,
+    category,
   },
 });

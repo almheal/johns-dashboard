@@ -5,8 +5,8 @@
         {{ `${$t("admin.editor.title")} "${routeLocale.title}"` }}
       </h1>
       <app-button
-        text="admin.utils.edit"
-        :loading="getLoader"
+        :text="$t('admin.utils.edit')"
+        :loading="itemLoader || updateLoader"
         @clickButton="editLocaleMessages"
       />
     </div>
@@ -14,7 +14,7 @@
       <span v-if="isError">{{ $t("admin.editor.error") }}</span>
     </div>
     <div class="locale-messages__body">
-      <locale-messages-editor v-model="messages" />
+      <locale-messages-editor v-model="messages" :loading="itemLoader" />
     </div>
   </div>
 </template>
@@ -22,7 +22,7 @@
 <script>
 import AppButton from "@/components/elements/AppButton";
 import LocaleMessagesEditor from "@/components/LocaleMessagesEditor";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "LocaleMessages",
@@ -47,11 +47,12 @@ export default {
     },
   },
   computed: {
-    ...mapGetters({
-      getAllLocaleMessages: "localeMessages/getItems",
-      getLoader: "localeMessages/getLoader",
-      getLocales: "locale/getItems",
-      getCurrentLocale: "locale/getItem",
+    ...mapState({
+      getAllLocaleMessages: (state) => state.localeMessages.items,
+      itemLoader: (state) => state.localeMessages.getItemLoader,
+      updateLoader: (state) => state.localeMessages.updateLoader,
+      getLocales: (state) => state.locale.items,
+      getCurrentLocale: (state) => state.locale.item,
     }),
     getCurrentLocaleMessages() {
       return this.getAllLocaleMessages.find(

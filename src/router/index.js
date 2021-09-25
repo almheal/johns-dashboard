@@ -10,6 +10,12 @@ const routes = [
     component: () => import("../views/Home"),
   },
   {
+    path: "/categories",
+    name: "Categories",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/Categories"),
+  },
+  {
     path: "/locales",
     name: "Locales",
     meta: { layout: "DefaultLayout", auth: true },
@@ -40,10 +46,10 @@ const routes = [
     component: () => import("../views/Ingredient"),
   },
   {
-    path: '/features',
-    name: 'Features',
-    meta: {layout: 'DefaultLayout', auth: true},
-    component: () => import("../views/Features")
+    path: "/features",
+    name: "Features",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/Features"),
   },
   {
     path: "/login",

@@ -66,7 +66,7 @@ const genericCrudStore = (url) => {
           commit("setLoader", { property: "getItemsLoader", value: true });
           const { data: body } = await service.getAll(query);
 
-          if (body.length) {
+          if (body.data && body.length) {
             commit("setItems", body.data);
             commit("setLengthAllItems", body.length);
           } else {
