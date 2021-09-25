@@ -128,10 +128,6 @@ export default {
     height: 100%;
   }
 
-  &__title {
-    font-size: 24px;
-  }
-
   &__header {
     display: flex;
     justify-content: flex-end;

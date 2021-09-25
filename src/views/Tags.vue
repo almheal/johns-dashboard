@@ -202,10 +202,6 @@ export default {
 
 <style lang="scss" scoped>
 .tags {
-  &__title {
-    font-size: 24px;
-  }
-
   &__inner {
     display: flex;
     flex-direction: column;

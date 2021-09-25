@@ -1,5 +1,5 @@
 <template>
-  <div class="app-dropdown">
+  <div class="app-dropdown" :class="{ 'full-width': fullWidth }">
     <div class="app-dropdown__placeholder" @click="toggleDropdown">
       {{ toShow(selectedItem) || placeholder }}
       <app-arrow-right-icon class="app-dropdown__icon" />
@@ -22,6 +22,7 @@ import AppArrowRightIcon from "@/components/icons/AppArrowRightIcon";
 
 export default {
   name: "AppDropdown",
+  emits: ["selectItem"],
   components: {
     AppArrowRightIcon,
   },
@@ -41,6 +42,14 @@ export default {
     toShow: {
       type: Function,
       default: () => {},
+    },
+    fullWidth: {
+      type: Boolean,
+      default: false,
+    },
+    multiSelect: {
+      type: Boolean,
+      default: false,
     },
   },
   data: () => ({
@@ -73,6 +82,12 @@ export default {
   display: flex;
   font-size: 16px;
 
+  &.full-width {
+    .app-dropdown__placeholder {
+      width: 100%;
+    }
+  }
+
   &__placeholder {
     position: relative;
     display: flex;
@@ -104,18 +119,19 @@ export default {
     position: absolute;
     border-radius: 4px;
     left: -1px;
-    opacity: 0;
     top: calc(100% + 5px);
+    opacity: 0;
+    z-index: 50;
     visibility: hidden;
     width: calc(100% + 2px);
     border: 1px solid rgb(156, 163, 175);
     background-color: #fff;
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
     transition: 0.2s;
 
     &.show {
       visibility: visible;
       opacity: 1;
-      z-index: 50;
       transition: 0.2s;
     }
   }

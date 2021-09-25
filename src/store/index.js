@@ -7,6 +7,7 @@ import tag from "./modules/tag";
 import ingredient from "./modules/ingredient";
 import feature from "./modules/feature";
 import category from "./modules/category";
+import product from "./modules/product";
 
 export default createStore({
   modules: {
@@ -18,5 +19,6 @@ export default createStore({
     ingredient,
     feature,
     category,
+    product,
   },
 });

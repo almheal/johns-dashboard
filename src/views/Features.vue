@@ -234,10 +234,6 @@ export default {
     flex-direction: column;
   }
 
-  &__title {
-    font-size: 24px;
-  }
-
   &__form {
     display: flex;
     justify-content: flex-end;

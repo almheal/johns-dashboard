@@ -166,10 +166,6 @@ export default {
     align-items: flex-start;
   }
 
-  &__title {
-    font-size: 24px;
-  }
-
   &__create {
     display: flex;
     align-items: flex-start;
