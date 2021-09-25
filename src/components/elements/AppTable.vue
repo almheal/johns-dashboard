@@ -8,7 +8,7 @@
           v-for="(column, index) in columns"
           :key="index"
         >
-          {{ $t(column.title) }}
+          {{ column.title }}
         </th>
         <th class="app-table__head" v-if="cross || edit"></th>
       </tr>
@@ -38,7 +38,7 @@
             :src="cell.img"
             alt="table-image"
           />
-          <span v-else>{{ $t(cell.title) }}</span>
+          <span v-else>{{ cell.title }}</span>
         </td>
         <td class="app-table__cell app-table__cell_icons" v-if="cross || edit">
           <div class="app-table__icons">

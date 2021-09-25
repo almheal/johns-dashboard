@@ -11,7 +11,7 @@
 
 <script>
 import AppDropdown from "@/components/elements/AppDropdown";
-import LanguageMixin from "@/components/language/LanguageMixin";
+import LanguageMixin from "@/mixins/LanguageMixin";
 import { mapGetters } from "vuex";
 
 export default {

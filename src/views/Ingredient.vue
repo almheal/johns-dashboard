@@ -12,21 +12,22 @@
       </h1>
       <form class="ingredient__form" @submit.prevent="ingredientActionHandler">
         <app-input
-          label="admin.utils.title"
+          :label="$t('admin.utils.title')"
+          :error="$t(errors.title)"
           v-model="ingredient.title"
-          :error="errors.title"
           @update:modelValue="resetErrorOnInput('title')"
         />
         <app-input
-          label="admin.utils.price"
+          :label="$t('admin.utils.price')"
+          :error="$t(errors.price)"
           v-model="ingredient.price"
-          :error="errors.price"
           @update:modelValue="resetErrorOnInput('price')"
         />
         <div class="ingredient__icon">
           <app-upload-file
-            label="admin.utils.icon"
-            :error="errors.icon"
+            :label="$t('admin.utils.icon')"
+            :error="$t(errors.icon)"
+            v-model="iconUrl"
             @changeFile="changeIcon"
             @preview="(preview) => (previewImgIngredient = preview)"
           />
@@ -39,19 +40,19 @@
           </div>
         </div>
         <app-input
-          label="admin.utils.category"
+          :label="$t('admin.utils.category')"
+          :error="$t(errors.category)"
           v-model="ingredient.category"
-          :error="errors.category"
           @update:modelValue="resetErrorOnInput('category')"
         />
         <app-button
           class="ingredient__button"
           :text="
             getRouteAction === 'create'
-              ? 'admin.utils.create'
-              : 'admin.utils.edit'
+              ? $t('admin.utils.create')
+              : $t('admin.utils.edit')
           "
-          :loading="isLoading || getLoader"
+          :loading="oneFeatureLoader || createLoader || updateLoader"
           buttonType="submit"
         />
       </form>
@@ -65,7 +66,8 @@ import AppButton from "@/components/elements/AppButton";
 import AppUploadFile from "@/components/elements/AppUploadFile";
 import { requestCreateImage } from "@/services/image.service";
 import { resetObjProperties } from "@/utils";
-import { mapActions, mapGetters } from "vuex";
+import { ERRORS_MESSAGE_CODES } from "@/consts/errors";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "Ingredient",
@@ -81,19 +83,21 @@ export default {
       icon: "",
       category: "",
     },
-    previewImgIngredient: "",
     errors: {
       title: "",
       price: "",
       icon: "",
       category: "",
     },
-    isLoading: false,
+    iconUrl: "",
+    previewImgIngredient: "",
   }),
   computed: {
-    ...mapGetters({
-      getIngredient: "ingredient/getItem",
-      getLoader: "ingredient/getLoader",
+    ...mapState({
+      oneFeatureLoader: (state) => state.ingredient.getItemLoader,
+      createLoader: (state) => state.ingredient.createLoader,
+      updateLoader: (state) => state.ingredient.updateLoader,
+      getIngredient: (state) => state.ingredient.item,
     }),
     getRouteAction() {
       return this.$route.params.action;
@@ -122,14 +126,13 @@ export default {
         }
 
         if (this.getRouteAction === "create") {
-          const { messageCodes } = await this.createIngredient({
+          await this.createIngredient({
             body: this.ingredient,
             addNew: false,
           });
-          if (!messageCodes) {
-            this.resetIngredient();
-          }
+          this.resetIngredient();
         }
+
         if (this.getRouteAction === "edit") {
           await this.updateIngredient({
             id: this.getEditId,
@@ -148,24 +151,25 @@ export default {
       this.errors[errorProperty] = "";
     },
     validate() {
-      let isValid = true;
-      const errors = [
-        { property: "title", messageCode: "17" },
-        { property: "price", messageCode: "19" },
-        { property: "icon", messageCode: "18" },
-        { property: "category", messageCode: "20" },
-      ];
-      errors.forEach(({ property, messageCode }) => {
-        if (!this.ingredient[property]) {
-          this.errors[property] = `errors.${messageCode}`;
-          isValid = false;
+      const errors = {
+        title: `errors.${ERRORS_MESSAGE_CODES.INGREDIENT_TITLE_EMPTY}`,
+        price: `errors.${ERRORS_MESSAGE_CODES.INGREDIENT_PRICE_EMPTY}`,
+        icon: `errors.${ERRORS_MESSAGE_CODES.INGREDIENT_ICON_EMPTY}`,
+        category: `errors.${ERRORS_MESSAGE_CODES.INGREDIENT_CATEGORY_EMPTY}`,
+      };
+
+      return Object.keys(errors).reduce((acc, key) => {
+        if (!this.ingredient[key]) {
+          this.errors[key] = errors[key];
+          acc = false;
         }
-      });
-      return isValid;
+        return acc;
+      }, true);
     },
     resetIngredient() {
       this.ingredient = resetObjProperties(this.ingredient);
       this.previewImgIngredient = "";
+      this.iconUrl = "";
     },
   },
   async mounted() {

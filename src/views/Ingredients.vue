@@ -3,30 +3,34 @@
     <div class="ingredients__inner">
       <h1 class="ingredients__title">{{ $t("app.ingredients.title") }}</h1>
       <div class="ingredients__header">
-        <app-button text="admin.utils.create" @click="toIngredient('create')" />
+        <app-button
+          :text="$t('admin.utils.create')"
+          @click="toIngredient('create')"
+        />
       </div>
       <div class="ingredients__body">
         <app-table
           :columns="columns"
-          :loading="isLoading"
           :rows="rows"
+          :loading="getItemsLoader"
           :cross="true"
           :edit="true"
           @clickEdit="({ item }) => toIngredient(`edit?id=${item._id}`)"
-          @clickCross="deleteIngredientHandler"
+          @clickCross="openDeleteModal"
         />
         <app-pagination
           class="ingredients__pagination"
-          :length="allIngredientsLength"
+          :length="ingredientsAllLength"
+          :limit="DEFAULT_LIMIT"
           @changePage="getIngredientsByLimit"
         />
       </div>
     </div>
     <app-information-modal
-      v-if="deleteIngredientId"
-      title="admin.confirmDelete.title"
+      v-if="deleteItemId"
+      :title="$t('admin.confirmDelete.title')"
       :text="`${$t('admin.confirmDelete.text')}?`"
-      :buttons="modalButtons"
+      :buttons="buttonsModalDelete"
       :close="closeModal"
     />
   </div>
@@ -37,9 +41,9 @@ import AppTable from "@/components/elements/AppTable";
 import AppButton from "@/components/elements/AppButton";
 import AppPagination from "@/components/elements/AppPagination";
 import AppInformationModal from "@/components/elements/AppInformationModal";
+import TableActionsMixin from "@/mixins/TableActionsMixin";
 import { calculatePagination } from "@/utils";
-import { LIMIT_ITEMS } from "@/consts";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "Ingredients",
@@ -49,37 +53,27 @@ export default {
     AppPagination,
     AppInformationModal,
   },
+  mixins: [TableActionsMixin],
   data: () => ({
-    columns: [
-      { title: "admin.utils.title" },
-      { title: "admin.utils.price" },
-      { title: "admin.utils.icon" },
-      { title: "admin.utils.category" },
-    ],
-    isLoading: false,
-    deleteIngredientId: null,
+    DEFAULT_LIMIT: 10,
   }),
   computed: {
-    ...mapGetters({
-      allIngredientsLength: "ingredient/getLength",
-      getIngredients: "ingredient/getItems",
-      getLoader: "ingredient/getLoader",
+    ...mapState({
+      deleteLoader: (state) => state.ingredient.deleteLoader,
+      getItemsLoader: (state) => state.ingredient.getItemsLoader,
+      ingredientsAllLength: (state) => state.ingredient.lengthAllItems,
+      getIngredients: (state) => state.ingredient.items,
     }),
+    columns() {
+      return [
+        { title: this.$t("admin.utils.title") },
+        { title: this.$t("admin.utils.price") },
+        { title: this.$t("admin.utils.icon") },
+        { title: this.$t("admin.utils.category") },
+      ];
+    },
     currentPage() {
       return this.$route.query.page;
-    },
-    modalButtons() {
-      return [
-        {
-          text: "admin.utils.cancel",
-          fn: this.closeModal,
-        },
-        {
-          text: "admin.utils.confirm",
-          loading: this.getLoader,
-          fn: this.deleteIngredientHandler,
-        },
-      ];
     },
     rows() {
       return this.getIngredients.map((ingredient) => {
@@ -106,46 +100,18 @@ export default {
   methods: {
     ...mapActions({
       getAllIngredients: "ingredient/getAllItems",
-      deleteIngredient: "ingredient/deleteItem",
+      deleteItem: "ingredient/deleteItem",
     }),
     async getIngredientsByLimit() {
-      if (this.getIngredients.length === 1 && this.currentPage > 1) {
-        await this.$router.replace({
-          query: {
-            page: this.currentPage - 1,
-          },
-        });
-      }
-
       const { skip, limit } = calculatePagination({
-        limit: LIMIT_ITEMS,
+        limit: this.DEFAULT_LIMIT,
         page: this.currentPage,
       });
 
-      this.isLoading = true;
-      await this.getAllIngredients({ skip, limit });
-      this.isLoading = false;
-    },
-    async deleteIngredientHandler(row) {
-      if (!this.deleteIngredientId) {
-        this.deleteIngredientId = row.item._id;
-        return;
-      }
-
-      await this.deleteIngredient({
-        id: this.deleteIngredientId,
-        isDelete: false,
-      });
-
-      this.getIngredientsByLimit();
-
-      this.closeModal();
+      this.getAllIngredients({ skip, limit });
     },
     toIngredient(actionName) {
       this.$router.push(`/ingredients/${actionName}`);
-    },
-    closeModal() {
-      this.deleteIngredientId = null;
     },
   },
   mounted() {
