@@ -8,7 +8,13 @@
         @clickButton="toProductByAction('create')"
       />
       <div class="products__body">
-        <app-table :columns="columns" />
+        <app-table
+          :columns="columns"
+          :rows="rows"
+          :cross="true"
+          :edit="true"
+          @clickEdit="(row) => toProductByAction(`edit?id=${row.item._id}`)"
+        />
         <app-pagination />
       </div>
     </div>
@@ -19,7 +25,7 @@
 import AppButton from "@/components/elements/AppButton";
 import AppTable from "@/components/elements/AppTable";
 import AppPagination from "@/components/elements/AppPagination";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "Products",
@@ -29,6 +35,9 @@ export default {
     AppPagination,
   },
   computed: {
+    ...mapState({
+      getProducts: (state) => state.product.items,
+    }),
     columns() {
       return [
         {
@@ -37,13 +46,28 @@ export default {
         {
           title: this.$t("app.varieties.title"),
         },
-        {
-          title: this.$t("app.features.title"),
-        },
-        {
-          title: this.$t("admin.utils.category"),
-        },
+        // {
+        //   title: this.$t("app.features.title"),
+        // },
+        // {
+        //   title: this.$t("admin.utils.category"),
+        // },
       ];
+    },
+    rows() {
+      return this.getProducts.map((product) => {
+        return {
+          item: product,
+          cells: [
+            {
+              title: this.$t(product.title),
+            },
+            {
+              title: this.$t(product.options[0].variety),
+            },
+          ],
+        };
+      });
     },
   },
   methods: {
@@ -53,6 +77,9 @@ export default {
     toProductByAction(action) {
       this.$router.push(`/products/${action}`);
     },
+  },
+  mounted() {
+    this.getAllProducts();
   },
 };
 </script>

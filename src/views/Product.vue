@@ -13,8 +13,11 @@
               <app-input
                 saveKey="product"
                 saveProperty="title"
+                :required="true"
                 :label="$t('admin.utils.title')"
+                :error="$t(errors.title)"
                 v-model="product.title"
+                @update:modelValue="errors.title = ''"
               />
               <app-dropdown
                 class="product-form__dropdown"
@@ -86,16 +89,46 @@
             :option="option"
             :number="index + 1"
             :id="option.id"
+            :imgError="$t(errors.img[option.id] || '')"
             v-model:optionVariety="option.variety"
             v-model:optionImg="option.img"
-            v-model:previewImgVariety="option.previewImgVariety"
-            v-model:imgUrl="option.imgUrl"
+            @update:optionImg="errors.img[option.id] = ''"
             @removeVariety="removeVarietyHandler"
-          />
+            @input="optionsSaveLocaleStorage"
+          >
+            <product-size
+              v-for="(size, index) in option.sizes"
+              :key="index"
+              :number="index + 1"
+              :id="size.id"
+              :priceError="$t(errors.price[size.id] || '')"
+              v-model:sizeTitle="size.size.title"
+              v-model:sizeUnit="size.size.unit"
+              v-model:persons="size.persons"
+              v-model:price="size.price"
+              v-model:proteins="size.nutritionalValue.proteins"
+              v-model:fats="size.nutritionalValue.fats"
+              v-model:carbohydrates="size.nutritionalValue.carbohydrates"
+              v-model:energyValue="size.nutritionalValue.energyValue"
+              v-model:weight="size.nutritionalValue.weight"
+              @removeSize="(id) => removeSizeHandler(id, option)"
+              @update:price="errors.price[size.id] = ''"
+              @input="optionsSaveLocaleStorage"
+            />
+            <app-button
+              :text="$t('admin.product.addSize')"
+              @clickButton="addSize(option)"
+            />
+          </product-variety>
           <app-button
             buttonType="button"
             :text="$t('admin.product.addVariety')"
-            @clickButton="addVariety"
+            @clickButton="addVariety(defaultOption)"
+          />
+          <app-button
+            class="product-form__create"
+            buttonType="submit"
+            :text="$t('admin.utils.create')"
           />
         </form>
         <app-circle-loader
@@ -116,7 +149,16 @@ import AppDropdown from "@/components/elements/AppDropdown";
 import AppButton from "@/components/elements/AppButton";
 import AppCircleLoader from "@/components/elements/AppCircleLoader";
 import ProductVariety from "@/components/product/ProductVariety";
+import ProductSize from "@/components/product/ProductSize";
 import { mapActions, mapState } from "vuex";
+import { requestCreateImage } from "@/services/image.service";
+import {
+  setDynamicItemLocalStorage,
+  getDynamicPropertyLocalStorage,
+  resetObjProperties,
+  setLocalStorage,
+} from "@/utils";
+import { ERRORS_MESSAGE_CODES } from "@/consts/errors";
 
 export default {
   name: "Product",
@@ -127,6 +169,7 @@ export default {
     AppButton,
     AppCircleLoader,
     ProductVariety,
+    ProductSize,
   },
   data: () => ({
     product: {
@@ -136,23 +179,12 @@ export default {
       tags: [],
       features: [],
       ingredients: [],
-      options: [
-        {
-          id: Math.floor(Math.random() * Date.now()),
-          variety: "",
-          img: "",
-          sizes: [],
-          previewImgVariety: "",
-          iconUrl: "",
-        },
-      ],
+      options: [],
     },
     defaultOption: {
       variety: "",
       img: "",
       sizes: [],
-      previewImgVariety: "",
-      imgUrl: "",
     },
     defaultSize: {
       size: {
@@ -169,6 +201,11 @@ export default {
         weight: "",
       },
     },
+    errors: {
+      title: "",
+      price: {},
+      img: {},
+    },
     isLoading: false,
   }),
   computed: {
@@ -177,7 +214,15 @@ export default {
       getTags: (state) => state.tag.items,
       getFeatures: (state) => state.feature.items,
       getIngredients: (state) => state.ingredient.items,
+      getProduct: (state) => state.product.item,
     }),
+    // current action from route
+    getRouteAction() {
+      return this.$route.params.action;
+    },
+    getEditId() {
+      return this.$route.query.id;
+    },
   },
   methods: {
     ...mapActions({
@@ -185,41 +230,181 @@ export default {
       getAllTags: "tag/getAllItems",
       getAllFeatures: "feature/getAllItems",
       getAllIngredients: "ingredient/getAllItems",
+      createProduct: "product/createItem",
+      updateProduct: "product/updateItem",
+      getOneProduct: "product/getItem",
     }),
-    productHandler() {
-      this.product.title = "";
-      this.product.description = "";
-      this.product.tags = [];
-      this.product.category = "";
-      this.product.options = [JSON.parse(JSON.stringify(this.defaultOption))];
-      this.product.imgUrl = "";
-      console.log(this.product);
+    async productHandler() {
+      //validate and set errors
+      const isValid = this.validate();
+      if (!isValid) {
+        return;
+      }
+
+      //copy product for creation
+      const product = JSON.parse(JSON.stringify(this.product));
+
+      //take from object property _id
+      product.tags = this.takeIdsFromArray(product.tags);
+      product.features = this.takeIdsFromArray(product.features);
+      product.ingredients = this.takeIdsFromArray(product.ingredients);
+      product.category = product.category._id;
+
+      //create image for every option
+      product.options = await this.createProductImages(this.product.options);
+      if (this.getRouteAction === "create") {
+        const { messageCodes } = await this.createProduct({ body: product });
+        if (!messageCodes) {
+          this.resetProductToDefault();
+        }
+      }
     },
-    addVariety() {
-      this.product.options.push(
+    async createProductImages(options) {
+      const optionsWithImages = options.map(async (option) => {
+        // if the typeof is equal to the object, then the value contains a file and we creation img url for option
+        if (typeof option.img === "object") {
+          const { data: imgUrl } = await requestCreateImage(option.img);
+          const copyOption = JSON.parse(JSON.stringify(option));
+          copyOption.img = imgUrl;
+          return copyOption;
+        }
+        return option;
+      });
+      return await Promise.all(optionsWithImages);
+    },
+    takeIdsFromArray(array) {
+      return array.map((item) => item._id);
+    },
+    copyProductForEdit() {},
+    // save product options to local storage
+    optionsSaveLocaleStorage() {
+      const copyProduct = JSON.parse(JSON.stringify(this.product));
+
+      // resetting pictures because after converting the file to a string, an empty object remains
+      copyProduct.options.forEach((option) => (option.img = ""));
+
+      setDynamicItemLocalStorage({
+        data: copyProduct.options,
+        key: "product",
+        property: "options",
+      });
+    },
+    // generate random id
+    generateId() {
+      return Math.floor(Math.random() * Date.now());
+    },
+    // add new default option with id
+    addVariety(option) {
+      const newOption = JSON.parse(
+        JSON.stringify({
+          ...option,
+          id: this.generateId(),
+        })
+      );
+      this.addSize(newOption);
+      this.product.options.push(newOption);
+      this.optionsSaveLocaleStorage();
+    },
+    // add new default size with id
+    addSize(option) {
+      option.sizes.push(
         JSON.parse(
-          JSON.stringify({
-            ...this.defaultOption,
-            id: Math.floor(Math.random() * Date.now()),
-          })
+          JSON.stringify({ ...this.defaultSize, id: this.generateId() })
         )
       );
+      this.optionsSaveLocaleStorage();
     },
+    resetProductToDefault() {
+      this.product = resetObjProperties(this.product);
+      this.addVariety(this.defaultOption);
+      setLocalStorage({ key: "product", data: this.product });
+    },
+    // validate product, every option, every size. If !options.length then add default option and default size for this option
+    validate() {
+      let isValid = true;
+      if (!this.product.options.length) {
+        this.addVariety(this.defaultOption);
+      }
+      if (!this.product.title) {
+        this.errors.title = `errors.${ERRORS_MESSAGE_CODES.PRODUCT_TITLE_EMPTY}`;
+        isValid = false;
+      }
+      this.product.options.forEach((option) => {
+        if (!option.img) {
+          this.errors.img[
+            option.id
+          ] = `errors.${ERRORS_MESSAGE_CODES.PRODUCT_IMAGE_EMPTY}`;
+          isValid = false;
+        }
+
+        if (!option.sizes.length) {
+          this.addSize(option);
+        }
+
+        for (let i = 0; i < option.sizes.length; i++) {
+          if (!option.sizes[i].price) {
+            isValid = false;
+            this.errors.price[
+              option.sizes[i].id
+            ] = `errors.${ERRORS_MESSAGE_CODES.PRODUCT_PRICE_EMPTY}`;
+          }
+        }
+      });
+      return isValid;
+    },
+    // remove variety by id
     removeVarietyHandler(id) {
       this.product.options = this.product.options.filter(
         (option) => option.id !== id
       );
+      this.optionsSaveLocaleStorage();
+    },
+    // remove size by id
+    removeSizeHandler(id, option) {
+      option.sizes = option.sizes.filter((size) => size.id !== id);
+      this.optionsSaveLocaleStorage();
     },
   },
   async mounted() {
+    if (this.getRouteAction === "edit" && !this.getEditId) {
+      this.$router.replace({
+        params: {
+          action: "create",
+        },
+      });
+    }
     this.isLoading = true;
+    // waiting for every items to create a product
     await Promise.all([
       this.getAllCategories(),
       this.getAllTags(),
       this.getAllFeatures(),
       this.getAllIngredients(),
     ]);
+
+    if (this.getRouteAction === "edit") {
+      await this.getOneProduct({
+        id: this.getEditId,
+        setItem: true,
+        addNew: false,
+      });
+      console.log(this.getProduct);
+    }
+
     this.isLoading = false;
+
+    // get saved product from local storage
+    const options = getDynamicPropertyLocalStorage({
+      key: "product",
+      property: "options",
+      defaultValue: [],
+    });
+    this.product.options = options;
+
+    if (!this.product.options.length) {
+      this.addVariety(this.defaultOption);
+      this.addSize(this.product.options[0]);
+    }
   },
 };
 </script>
@@ -251,6 +436,7 @@ export default {
   &-form {
     &__row {
       display: flex;
+      margin-bottom: 20px;
     }
 
     &__column {
@@ -266,6 +452,10 @@ export default {
       &:last-child {
         margin-bottom: 0;
       }
+    }
+
+    &__create {
+      margin: 25px 0 0 auto;
     }
   }
 }

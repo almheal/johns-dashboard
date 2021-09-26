@@ -16,9 +16,11 @@
         <div class="variety__row">
           <app-upload-file
             class="variety__upload"
+            :label="$t('admin.utils.image')"
             :modelValue="imgUrl"
+            :error="imgError"
             @changeFile="changeImg"
-            @preview="$emit('update:previewImgVariety', $event)"
+            @preview="(preview) => (previewImgVariety = preview)"
             @update:modelValue="$emit('update:imgUrl', $event)"
           />
           <div class="variety__preview">
@@ -32,6 +34,7 @@
         </div>
       </div>
     </div>
+    <slot></slot>
   </div>
 </template>
 
@@ -56,7 +59,7 @@ export default {
       type: String,
       default: "",
     },
-    previewImgVariety: {
+    imgError: {
       type: String,
       default: "",
     },
@@ -73,6 +76,9 @@ export default {
       default: 0,
     },
   },
+  data: () => ({
+    previewImgVariety: "",
+  }),
   methods: {
     changeImg(formData) {
       this.$emit("update:optionImg", formData);
@@ -86,8 +92,8 @@ export default {
   position: relative;
   border-radius: 4px;
   border: 1px solid #9ca3af;
-  padding: 15px 15px 15px 45px;
-  margin: 20px 0;
+  padding: 15px 35px 15px 45px;
+  margin-bottom: 20px;
 
   &__number {
     display: flex;
@@ -135,7 +141,7 @@ export default {
   }
 
   &__upload {
-    margin: 22px 25px 0 0;
+    margin: 0 25px 0 0;
   }
 
   &__img {

@@ -1,18 +1,15 @@
 <template>
   <div class="input-wrapper">
-    <label
-      :for="dynamicId"
-      class="input__label"
-      data-test="label"
-      v-if="label"
-      >{{ label }}</label
+    <label :for="dynamicId" class="input__label" data-test="label" v-if="label"
+      >{{ label }}<span class="input__required" v-if="required">*</span></label
     >
     <input
-      :type="typeInput"
       class="input"
+      data-test="input"
+      :class="{ error: error }"
+      :type="typeInput"
       :value="modelValue"
       :placeholder="placeholder"
-      data-test="input"
       :id="dynamicId"
       @input="inputHandler"
     />
@@ -34,6 +31,10 @@ export default {
     modelValue: {
       type: String,
       default: "",
+    },
+    required: {
+      type: Boolean,
+      default: false,
     },
     label: {
       type: String,
@@ -121,6 +122,14 @@ export default {
     border-color: rgb(79, 70, 229);
     box-shadow: 0px 0px 0px 3px rgba(99, 102, 241, 0.4);
     transition: 0.2s;
+  }
+
+  &.error {
+    box-shadow: 0px 0px 0px 3px rgba(#c21313, 0.4);
+  }
+
+  &__required {
+    color: #c21313;
   }
 
   &__label {
