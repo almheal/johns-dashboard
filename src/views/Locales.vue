@@ -109,6 +109,10 @@ export default {
       updateLocale: "locale/updateItem",
       createLocaleMessages: "localeMessages/createItem",
     }),
+    async deleteItemHandler() {
+      await this.deleteItem({ id: this.deleteItemId });
+      this.closeModal();
+    },
     editLocaleHandler(row = {}) {
       this.editItemId = row.item._id;
       this.locale.title = row.item.title;

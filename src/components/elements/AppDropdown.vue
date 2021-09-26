@@ -1,13 +1,21 @@
 <template>
   <div class="app-dropdown" :class="{ 'full-width': fullWidth }">
     <div class="app-dropdown__placeholder" @click="toggleDropdown">
-      {{ toShow(selectedItem) || placeholder }}
+      {{
+        multiSelect
+          ? selectedItems || placeholder
+          : toShow(selectedItem) || placeholder
+      }}
       <app-arrow-right-icon class="app-dropdown__icon" />
       <ul class="app-dropdown__list" :class="{ show: isShow }">
         <li
           class="app-dropdown__item"
           v-for="(item, index) in itemsList"
           :key="index"
+          :class="{
+            'app-dropdown__item_multi-is-active':
+              multiSelectShowingItems.includes(toShow(item)),
+          }"
           @click.stop="selectItem(item)"
         >
           {{ toShow(item) }}
@@ -19,6 +27,10 @@
 
 <script>
 import AppArrowRightIcon from "@/components/icons/AppArrowRightIcon";
+import {
+  setDynamicItemLocalStorage,
+  getDynamicPropertyLocalStorage,
+} from "@/utils";
 
 export default {
   name: "AppDropdown",
@@ -36,8 +48,8 @@ export default {
       default: "",
     },
     selectedItem: {
-      type: String,
-      default: "",
+      type: Object,
+      default: () => {},
     },
     toShow: {
       type: Function,
@@ -51,6 +63,18 @@ export default {
       type: Boolean,
       default: false,
     },
+    multiSelectedItems: {
+      type: Array,
+      default: () => [],
+    },
+    saveKey: {
+      type: String,
+      default: "",
+    },
+    saveProperty: {
+      type: String,
+      default: "",
+    },
   },
   data: () => ({
     isShow: false,
@@ -61,6 +85,27 @@ export default {
         (item) => this.toShow(item) !== this.toShow(this.selectedItem)
       );
     },
+    selectedItems() {
+      if (!this.multiSelect) {
+        return null;
+      }
+
+      return this.multiSelectedItems.slice(0, 5).reduce((acc, item, index) => {
+        acc += !index ? this.toShow(item) : `, ${this.toShow(item)}`;
+        return acc;
+      }, "");
+    },
+    multiSelectShowingItems() {
+      return this.multiSelectedItems.map((item) => this.toShow(item));
+    },
+  },
+  watch: {
+    selectedItem(value) {
+      this.setSaveItems(value);
+    },
+    multiSelectedItems(value) {
+      this.setSaveItems(value);
+    },
   },
   methods: {
     toggleDropdown() {
@@ -70,9 +115,55 @@ export default {
       this.isShow = !this.isShow;
     },
     selectItem(item) {
+      if (this.multiSelect) {
+        this.multiSelectHandler(item);
+        return;
+      }
       this.toggleDropdown();
       this.$emit("selectItem", item);
+      if (this.saveKey && this.saveProperty) {
+        setDynamicItemLocalStorage({
+          key: this.saveKey,
+          property: this.saveProperty,
+          data: item,
+        });
+      }
     },
+    setSaveItems(value) {
+      if (this.saveKey && this.saveProperty) {
+        setDynamicItemLocalStorage({
+          key: this.saveKey,
+          property: this.saveProperty,
+          data: value,
+        });
+      }
+    },
+    multiSelectHandler(selectedItem) {
+      let emittedArray = null;
+      const isInArray = this.multiSelectedItems.some(
+        (item) => this.toShow(item) === this.toShow(selectedItem)
+      );
+      if (!isInArray) {
+        emittedArray = [...this.multiSelectedItems, selectedItem];
+      } else {
+        emittedArray = this.multiSelectedItems.filter(
+          (item) => this.toShow(item) !== this.toShow(selectedItem)
+        );
+      }
+
+      this.$emit("selectItem", emittedArray);
+      this.setSaveItems(emittedArray);
+    },
+  },
+  mounted() {
+    if (this.saveKey && this.saveProperty) {
+      const value = getDynamicPropertyLocalStorage({
+        key: this.saveKey,
+        property: this.saveProperty,
+        defaultValue: this.multiSelect ? [] : "",
+      });
+      this.$emit("selectItem", value);
+    }
   },
 };
 </script>
@@ -148,6 +239,10 @@ export default {
 
     &:last-child {
       border-bottom: none;
+    }
+
+    &_multi-is-active {
+      background-color: #e5e7eb;
     }
   }
 }

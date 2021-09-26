@@ -201,6 +201,11 @@ export default {
       this.featureImgPreview = item.icon;
       this.editFeatureId = item._id;
     },
+    async deleteItemHandler() {
+      await this.deleteItem({ id: this.deleteItemId });
+      this.getFeaturesByLimit();
+      this.closeModal();
+    },
     getFeaturesByLimit() {
       const { skip, limit } = calculatePagination({
         limit: this.DEFAULT_LIMIT,

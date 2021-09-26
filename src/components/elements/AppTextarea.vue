@@ -8,7 +8,7 @@
       :id="dynamicId"
       :placeholder="placeholder"
       :value="modelValue"
-      @input="$emit('update:modelValue', $event.target.value)"
+      @input="textareaHandler"
     ></textarea>
     <div class="app-textarea__error" v-if="error">
       {{ error }}
@@ -17,6 +17,11 @@
 </template>
 
 <script>
+import {
+  setDynamicItemLocalStorage,
+  getDynamicPropertyLocalStorage,
+} from "@/utils";
+
 export default {
   name: "AppTextarea",
   props: {
@@ -36,13 +41,54 @@ export default {
       type: String,
       default: "",
     },
+    saveKey: {
+      type: String,
+      default: "",
+    },
+    saveProperty: {
+      type: String,
+      default: "",
+    },
   },
-
   computed: {
     dynamicId() {
       const id = Math.floor((Date.now() * Math.random()) / Math.random());
       return id;
     },
+  },
+  watch: {
+    modelValue(value) {
+      if (this.saveKey && this.saveProperty) {
+        setDynamicItemLocalStorage({
+          key: this.saveKey,
+          property: this.saveProperty,
+          data: value,
+        });
+      }
+    },
+  },
+  methods: {
+    textareaHandler(e) {
+      this.$emit("update:modelValue", e.target.value);
+      if (this.saveKey && this.saveProperty) {
+        setDynamicItemLocalStorage({
+          key: this.saveKey,
+          property: this.saveProperty,
+          data: e.target.value,
+        });
+      }
+    },
+  },
+  mounted() {
+    if (this.saveKey && this.saveProperty) {
+      this.$emit(
+        "update:modelValue",
+        getDynamicPropertyLocalStorage({
+          key: this.saveKey,
+          property: this.saveProperty,
+        })
+      );
+    }
   },
 };
 </script>

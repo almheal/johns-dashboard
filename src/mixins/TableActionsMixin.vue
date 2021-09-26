@@ -26,10 +26,6 @@ export default {
     openDeleteModal(row) {
       this.deleteItemId = row.item._id;
     },
-    async deleteItemHandler() {
-      await this.deleteItem({ id: this.deleteItemId });
-      this.closeModal();
-    },
   },
 };
 </script>

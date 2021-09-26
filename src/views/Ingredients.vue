@@ -102,6 +102,11 @@ export default {
       getAllIngredients: "ingredient/getAllItems",
       deleteItem: "ingredient/deleteItem",
     }),
+    async deleteItemHandler() {
+      await this.deleteItem({ id: this.deleteItemId });
+      this.getIngredientsByLimit();
+      this.closeModal();
+    },
     async getIngredientsByLimit() {
       const { skip, limit } = calculatePagination({
         limit: this.DEFAULT_LIMIT,

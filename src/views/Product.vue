@@ -3,55 +3,100 @@
     <div class="product__inner">
       <h1 class="product__title">{{ $t("admin.product.creation") }}</h1>
       <div class="product__body">
-        <form class="product-form" v-if="!isLoading">
+        <form
+          class="product-form"
+          v-if="!isLoading"
+          @submit.prevent="productHandler"
+        >
           <div class="product-form__row">
             <div class="product-form__column">
               <app-input
+                saveKey="product"
+                saveProperty="title"
                 :label="$t('admin.utils.title')"
                 v-model="product.title"
               />
               <app-dropdown
                 class="product-form__dropdown"
+                saveKey="product"
+                saveProperty="category"
                 :fullWidth="true"
                 :placeholder="$t('admin.product.selectCategory')"
                 :items="getCategories"
                 :toShow="
-                  (category) => (category.title ? $t(category.title) : '')
+                  (category) => (category?.title ? $t(category.title) : '')
                 "
                 :selectedItem="product.category"
                 @selectItem="(category) => (product.category = category)"
               />
               <app-dropdown
                 class="product-form__dropdown"
+                saveKey="product"
+                saveProperty="tags"
                 :fullWidth="true"
                 :placeholder="$t('admin.product.selectTags')"
+                :multiSelect="true"
+                :multiSelectedItems="product.tags"
                 :items="getTags"
-                :toShow="(tag) => (tag.title ? $t(tag.title) : '')"
+                :toShow="(tag) => (tag?.title ? $t(tag.title) : '')"
+                @selectItem="(tags) => (product.tags = tags)"
               />
               <app-dropdown
                 class="product-form__dropdown"
+                saveKey="product"
+                saveProperty="features"
                 :fullWidth="true"
                 :placeholder="$t('admin.product.selectFeatures')"
+                :multiSelect="true"
+                :multiSelectedItems="product.features"
                 :items="getFeatures"
-                :toShow="(feature) => (feature.title ? $t(feature.title) : '')"
+                :toShow="(feature) => (feature?.title ? $t(feature.title) : '')"
+                @selectItem="(features) => (product.features = features)"
               />
               <app-dropdown
                 class="product-form__dropdown"
+                saveKey="product"
+                saveProperty="ingredients"
                 :fullWidth="true"
                 :placeholder="$t('admin.product.selectIngredients')"
+                :multiSelect="true"
+                :multiSelectedItems="product.ingredients"
                 :items="getIngredients"
                 :toShow="
-                  (ingredient) => (ingredient.title ? $t(ingredient.title) : '')
+                  (ingredient) =>
+                    ingredient?.title ? $t(ingredient.title) : ''
+                "
+                @selectItem="
+                  (ingredients) => (product.ingredients = ingredients)
                 "
               />
             </div>
             <div class="product-form__column">
               <app-textarea
+                saveKey="product"
+                saveProperty="description"
                 :label="$t('admin.product.description')"
                 v-model="product.description"
               />
             </div>
           </div>
+          <product-variety
+            v-for="(option, index) in product.options"
+            :key="index"
+            :option="option"
+            :number="index + 1"
+            :id="option.id"
+            v-model:optionVariety="option.variety"
+            v-model:optionImg="option.img"
+            v-model:previewImgVariety="option.previewImgVariety"
+            v-model:imgUrl="option.imgUrl"
+            @removeVariety="removeVarietyHandler"
+          />
+          <app-button
+            buttonType="button"
+            :text="$t('admin.product.addVariety')"
+            @clickButton="addVariety"
+          />
         </form>
         <app-circle-loader
           class="product__loader"
@@ -68,7 +113,9 @@
 import AppInput from "@/components/elements/AppInput";
 import AppTextarea from "@/components/elements/AppTextarea";
 import AppDropdown from "@/components/elements/AppDropdown";
+import AppButton from "@/components/elements/AppButton";
 import AppCircleLoader from "@/components/elements/AppCircleLoader";
+import ProductVariety from "@/components/product/ProductVariety";
 import { mapActions, mapState } from "vuex";
 
 export default {
@@ -77,7 +124,9 @@ export default {
     AppInput,
     AppTextarea,
     AppDropdown,
+    AppButton,
     AppCircleLoader,
+    ProductVariety,
   },
   data: () => ({
     product: {
@@ -87,6 +136,38 @@ export default {
       tags: [],
       features: [],
       ingredients: [],
+      options: [
+        {
+          id: Math.floor(Math.random() * Date.now()),
+          variety: "",
+          img: "",
+          sizes: [],
+          previewImgVariety: "",
+          iconUrl: "",
+        },
+      ],
+    },
+    defaultOption: {
+      variety: "",
+      img: "",
+      sizes: [],
+      previewImgVariety: "",
+      imgUrl: "",
+    },
+    defaultSize: {
+      size: {
+        title: "",
+        unit: "",
+      },
+      persons: "",
+      price: "",
+      nutritionalValue: {
+        proteins: "",
+        fats: "",
+        carbohydrates: "",
+        energyValue: "",
+        weight: "",
+      },
     },
     isLoading: false,
   }),
@@ -105,6 +186,30 @@ export default {
       getAllFeatures: "feature/getAllItems",
       getAllIngredients: "ingredient/getAllItems",
     }),
+    productHandler() {
+      this.product.title = "";
+      this.product.description = "";
+      this.product.tags = [];
+      this.product.category = "";
+      this.product.options = [JSON.parse(JSON.stringify(this.defaultOption))];
+      this.product.imgUrl = "";
+      console.log(this.product);
+    },
+    addVariety() {
+      this.product.options.push(
+        JSON.parse(
+          JSON.stringify({
+            ...this.defaultOption,
+            id: Math.floor(Math.random() * Date.now()),
+          })
+        )
+      );
+    },
+    removeVarietyHandler(id) {
+      this.product.options = this.product.options.filter(
+        (option) => option.id !== id
+      );
+    },
   },
   async mounted() {
     this.isLoading = true;
