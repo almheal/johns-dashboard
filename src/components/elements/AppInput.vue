@@ -60,6 +60,10 @@ export default {
       type: String,
       default: "",
     },
+    isSaved: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     dynamicId() {
@@ -69,7 +73,7 @@ export default {
   },
   watch: {
     modelValue(value) {
-      if (this.saveKey && this.saveProperty) {
+      if (this.saveKey && this.saveProperty && this.isSaved) {
         setDynamicItemLocalStorage({
           key: this.saveKey,
           property: this.saveProperty,
@@ -81,7 +85,7 @@ export default {
   methods: {
     inputHandler(e) {
       this.$emit("update:modelValue", e.target.value);
-      if (this.saveKey && this.saveProperty) {
+      if (this.saveKey && this.saveProperty && this.isSaved) {
         setDynamicItemLocalStorage({
           key: this.saveKey,
           property: this.saveProperty,
@@ -91,7 +95,7 @@ export default {
     },
   },
   mounted() {
-    if (this.saveKey && this.saveProperty) {
+    if (this.saveKey && this.saveProperty && this.isSaved) {
       this.$emit(
         "update:modelValue",
         getDynamicPropertyLocalStorage({

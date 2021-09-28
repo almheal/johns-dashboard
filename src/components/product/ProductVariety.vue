@@ -19,6 +19,7 @@
             :label="$t('admin.utils.image')"
             :modelValue="imgUrl"
             :error="imgError"
+            :required="true"
             @changeFile="changeImg"
             @preview="(preview) => (previewImgVariety = preview)"
             @update:modelValue="$emit('update:imgUrl', $event)"

@@ -75,6 +75,10 @@ export default {
       type: String,
       default: "",
     },
+    isSaved: {
+      type: Boolean,
+      default: false
+    }
   },
   data: () => ({
     isShow: false,
@@ -121,7 +125,7 @@ export default {
       }
       this.toggleDropdown();
       this.$emit("selectItem", item);
-      if (this.saveKey && this.saveProperty) {
+      if (this.saveKey && this.saveProperty && this.isSaved) {
         setDynamicItemLocalStorage({
           key: this.saveKey,
           property: this.saveProperty,
@@ -130,7 +134,7 @@ export default {
       }
     },
     setSaveItems(value) {
-      if (this.saveKey && this.saveProperty) {
+      if (this.saveKey && this.saveProperty && this.isSaved) {
         setDynamicItemLocalStorage({
           key: this.saveKey,
           property: this.saveProperty,
@@ -156,7 +160,7 @@ export default {
     },
   },
   mounted() {
-    if (this.saveKey && this.saveProperty) {
+    if (this.saveKey && this.saveProperty && this.isSaved) {
       const value = getDynamicPropertyLocalStorage({
         key: this.saveKey,
         property: this.saveProperty,

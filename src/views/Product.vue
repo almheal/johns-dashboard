@@ -13,6 +13,7 @@
               <app-input
                 saveKey="product"
                 saveProperty="title"
+                :isSaved="getRouteAction === 'create' ? true : false"
                 :required="true"
                 :label="$t('admin.utils.title')"
                 :error="$t(errors.title)"
@@ -23,6 +24,7 @@
                 class="product-form__dropdown"
                 saveKey="product"
                 saveProperty="category"
+                :isSaved="getRouteAction === 'create' ? true : false"
                 :fullWidth="true"
                 :placeholder="$t('admin.product.selectCategory')"
                 :items="getCategories"
@@ -36,6 +38,7 @@
                 class="product-form__dropdown"
                 saveKey="product"
                 saveProperty="tags"
+                :isSaved="getRouteAction === 'create' ? true : false"
                 :fullWidth="true"
                 :placeholder="$t('admin.product.selectTags')"
                 :multiSelect="true"
@@ -48,6 +51,7 @@
                 class="product-form__dropdown"
                 saveKey="product"
                 saveProperty="features"
+                :isSaved="getRouteAction === 'create' ? true : false"
                 :fullWidth="true"
                 :placeholder="$t('admin.product.selectFeatures')"
                 :multiSelect="true"
@@ -60,6 +64,7 @@
                 class="product-form__dropdown"
                 saveKey="product"
                 saveProperty="ingredients"
+                :isSaved="getRouteAction === 'create' ? true : false"
                 :fullWidth="true"
                 :placeholder="$t('admin.product.selectIngredients')"
                 :multiSelect="true"
@@ -78,6 +83,7 @@
               <app-textarea
                 saveKey="product"
                 saveProperty="description"
+                :isSaved="getRouteAction === 'create' ? true : false"
                 :label="$t('admin.product.description')"
                 v-model="product.description"
               />
@@ -123,12 +129,17 @@
           <app-button
             buttonType="button"
             :text="$t('admin.product.addVariety')"
-            @clickButton="addVariety(defaultOption)"
+            @clickButton="addVariety(defaultOption, defaultSize)"
           />
           <app-button
             class="product-form__create"
             buttonType="submit"
-            :text="$t('admin.utils.create')"
+            :loading="createAndUpdateLoader"
+            :text="
+              getRouteAction === 'create'
+                ? $t('admin.utils.create')
+                : $t('admin.utils.edit')
+            "
           />
         </form>
         <app-circle-loader
@@ -206,6 +217,7 @@ export default {
       price: {},
       img: {},
     },
+    createAndUpdateLoader: false,
     isLoading: false,
   }),
   computed: {
@@ -250,6 +262,8 @@ export default {
       product.ingredients = this.takeIdsFromArray(product.ingredients);
       product.category = product.category._id;
 
+      this.createAndUpdateLoader = true;
+
       //create image for every option
       product.options = await this.createProductImages(this.product.options);
       if (this.getRouteAction === "create") {
@@ -257,7 +271,11 @@ export default {
         if (!messageCodes) {
           this.resetProductToDefault();
         }
+      } else {
+        this.updateProduct({ body: product, id: product._id });
       }
+
+      this.createAndUpdateLoader = false;
     },
     async createProductImages(options) {
       const optionsWithImages = options.map(async (option) => {
@@ -275,7 +293,22 @@ export default {
     takeIdsFromArray(array) {
       return array.map((item) => item._id);
     },
-    copyProductForEdit() {},
+    copyProductForEdit() {
+      // const copyProduct = JSON.parse(JSON.stringify(product));
+      // copyProduct.options = copyProduct.options.map((option) => {
+      //   for (let i = 0; i < option.sizes.length; i++) {
+      //     option.sizes[i] = {
+      //       ...option.sizes[i],
+      //       id: this.generateId(),
+      //     };
+      //   }
+      //   return {
+      //     ...option,
+      //     id: this.generateId(),
+      //   };
+      // });
+      // this.product = copyProduct;
+    },
     // save product options to local storage
     optionsSaveLocaleStorage() {
       const copyProduct = JSON.parse(JSON.stringify(this.product));
@@ -294,36 +327,37 @@ export default {
       return Math.floor(Math.random() * Date.now());
     },
     // add new default option with id
-    addVariety(option) {
+    addVariety(option, size, target = this.product) {
       const newOption = JSON.parse(
         JSON.stringify({
           ...option,
           id: this.generateId(),
         })
       );
-      this.addSize(newOption);
-      this.product.options.push(newOption);
+
+      if (size) {
+        this.addSize(newOption, size);
+      }
+      target.options.push(newOption);
       this.optionsSaveLocaleStorage();
     },
     // add new default size with id
-    addSize(option) {
+    addSize(option, size = this.defaultSize) {
       option.sizes.push(
-        JSON.parse(
-          JSON.stringify({ ...this.defaultSize, id: this.generateId() })
-        )
+        JSON.parse(JSON.stringify({ ...size, id: this.generateId() }))
       );
       this.optionsSaveLocaleStorage();
     },
     resetProductToDefault() {
       this.product = resetObjProperties(this.product);
-      this.addVariety(this.defaultOption);
+      this.addVariety(this.defaultOption, this.defaultSize);
       setLocalStorage({ key: "product", data: this.product });
     },
     // validate product, every option, every size. If !options.length then add default option and default size for this option
     validate() {
       let isValid = true;
       if (!this.product.options.length) {
-        this.addVariety(this.defaultOption);
+        this.addVariety(this.defaultOption, this.defaultSize);
       }
       if (!this.product.title) {
         this.errors.title = `errors.${ERRORS_MESSAGE_CODES.PRODUCT_TITLE_EMPTY}`;
@@ -388,18 +422,18 @@ export default {
         setItem: true,
         addNew: false,
       });
-      console.log(this.getProduct);
+      this.copyProductForEdit(this.getProduct);
+    } else {
+      // get saved product from local storage
+      const options = getDynamicPropertyLocalStorage({
+        key: "product",
+        property: "options",
+        defaultValue: [],
+      });
+      this.product.options = options;
     }
 
     this.isLoading = false;
-
-    // get saved product from local storage
-    const options = getDynamicPropertyLocalStorage({
-      key: "product",
-      property: "options",
-      defaultValue: [],
-    });
-    this.product.options = options;
 
     if (!this.product.options.length) {
       this.addVariety(this.defaultOption);

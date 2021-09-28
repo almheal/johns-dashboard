@@ -11,9 +11,11 @@
         <app-table
           :columns="columns"
           :rows="rows"
+          :loading="getItemsLoader"
           :cross="true"
           :edit="true"
           @clickEdit="(row) => toProductByAction(`edit?id=${row.item._id}`)"
+          @clickCross="(row) => deleteItem({ id: row.item._id })"
         />
         <app-pagination />
       </div>
@@ -37,15 +39,16 @@ export default {
   computed: {
     ...mapState({
       getProducts: (state) => state.product.items,
+      getItemsLoader: (state) => state.product.getItemsLoader,
     }),
     columns() {
       return [
         {
           title: this.$t("admin.utils.title"),
         },
-        {
-          title: this.$t("app.varieties.title"),
-        },
+        // {
+        //   title: this.$t("app.varieties.title"),
+        // },
         // {
         //   title: this.$t("app.features.title"),
         // },
@@ -62,9 +65,9 @@ export default {
             {
               title: this.$t(product.title),
             },
-            {
-              title: this.$t(product.options[0].variety),
-            },
+            // {
+            //   title: this.$t(product.options[0]?.variety || ""),
+            // },
           ],
         };
       });
@@ -73,6 +76,7 @@ export default {
   methods: {
     ...mapActions({
       getAllProducts: "product/getAllItems",
+      deleteItem: "product/deleteItem",
     }),
     toProductByAction(action) {
       this.$router.push(`/products/${action}`);
