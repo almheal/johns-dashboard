@@ -9,6 +9,6 @@ cd dist
 git add -A
 git commit -m 'deploy'
 
-git push -f git@github.com:almheal/johns-dashboard.git origin:gh-pages
+git push -f git@github.com:almheal/johns-dashboard.git master:gh-pages
 
 cd -
