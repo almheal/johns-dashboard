@@ -2,24 +2,33 @@
   <div class="login">
     <div class="container">
       <div class="login__inner">
-        <h1 class="login__title">Welcome!</h1>
+        <h1 class="login__title">{{ $t("admin.login.welcome") }}</h1>
         <form class="login-form" @submit.prevent="loginHandler">
-          <h3 class="login-form__title">Login</h3>
+          <h3 class="login-form__title">{{ $t("admin.login.title") }}</h3>
           <div class="login-form__body">
-            <app-input label="Name" v-model="user.name" :error="errors.name" />
             <app-input
-              label="Password"
+              :label="$t('admin.login.username')"
+              :error="$t(errors.name)"
+              v-model="user.name"
+              @update:modelValue="errors.name = ''"
+            />
+            <app-input
               typeInput="password"
+              :label="$t('admin.login.password')"
+              :error="$t(errors.password)"
               v-model="user.password"
-              :error="errors.password"
+              @update:modelValue="errors.password = ''"
             />
           </div>
-          <app-button
-            class="login-form__button"
-            text="Login"
-            buttonType="submit"
-            :loading="getLoader"
-          />
+          <div class="login-form__actions">
+            <dropdown-language />
+            <app-button
+              class="login-form__button"
+              :text="$t('admin.login.login')"
+              buttonType="submit"
+              :loading="getLoader"
+            />
+          </div>
         </form>
       </div>
     </div>
@@ -29,6 +38,8 @@
 <script>
 import AppInput from "@/components/elements/AppInput";
 import AppButton from "@/components/elements/AppButton";
+import DropdownLanguage from "@/components/DropdownLanguage";
+import { ERRORS_MESSAGE_CODES } from "@/consts/errors";
 import { mapActions, mapGetters } from "vuex";
 
 export default {
@@ -36,6 +47,7 @@ export default {
   components: {
     AppInput,
     AppButton,
+    DropdownLanguage,
   },
   data: () => ({
     user: {
@@ -52,18 +64,6 @@ export default {
       getLoader: "user/getLoader",
     }),
   },
-  watch: {
-    "user.name"() {
-      if (this.errors.name) {
-        this.errors.name = "";
-      }
-    },
-    "user.password"() {
-      if (this.errors.password) {
-        this.errors.password = "";
-      }
-    },
-  },
   methods: {
     ...mapActions({
       login: "user/login",
@@ -72,16 +72,16 @@ export default {
       let isValid = true;
 
       if (!user.name) {
-        this.errors.name = "Обязательное поле";
+        this.errors.name = `errors.${ERRORS_MESSAGE_CODES.NAME_EMPTY}`;
         isValid = false;
       }
       if (!user.password) {
-        this.errors.password = "Обязательное поле";
+        this.errors.password = `errors.${ERRORS_MESSAGE_CODES.PASSWORD_EMPTY}`;
         isValid = false;
       }
 
       if (user.password && user.password.length < 6) {
-        this.errors.password = "Минимальная длина 6 символов";
+        this.errors.password = `errors.${ERRORS_MESSAGE_CODES.PASSWORD_LENGTH_LESS_MIN}`;
         isValid = false;
       }
 
@@ -91,12 +91,11 @@ export default {
       if (!this.validate(this.user)) {
         return;
       }
-      try {
-        await this.login(this.user);
-        this.$router.push("/");
-      } catch (err) {
-        return err;
+      const result = await this.login(this.user);
+      if (result && result.messageCodes) {
+        return;
       }
+      this.$router.push("/");
     },
   },
 };
@@ -137,8 +136,10 @@ export default {
       margin-bottom: 25px;
     }
 
-    &__button {
-      margin: 0 0 0 auto;
+    &__actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
   }
 }

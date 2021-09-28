@@ -1,5 +1,8 @@
 <template>
-  <div class="app-loader">
+  <div
+    class="app-loader"
+    :class="{ 'blue-color': color === 'blue', large: size === 'large' }"
+  >
     <div class="app-loader__item"></div>
     <div class="app-loader__item"></div>
     <div class="app-loader__item"></div>
@@ -9,6 +12,16 @@
 <script>
 export default {
   name: "AppCircleLoader",
+  props: {
+    color: {
+      type: String,
+      default: "",
+    },
+    size: {
+      type: String,
+      default: "",
+    },
+  },
 };
 </script>
 
@@ -19,6 +32,22 @@ export default {
   width: 33px;
   height: 33px;
 
+  &.blue-color {
+    .app-loader__item {
+      border-color: rgb(99, 102, 241) transparent transparent transparent;
+    }
+  }
+
+  &.large {
+    width: 52px;
+    height: 52px;
+
+    .app-loader__item {
+      width: 45px;
+      height: 45px;
+    }
+  }
+
   &__item {
     box-sizing: border-box;
     display: block;
@@ -26,7 +55,7 @@ export default {
     width: 26px;
     height: 26px;
     margin: 4px;
-    border: 4px solid #fff;
+    border: 3px solid #fff;
     border-radius: 50%;
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     border-color: #fff transparent transparent transparent;

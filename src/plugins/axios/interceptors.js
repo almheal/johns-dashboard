@@ -2,22 +2,25 @@ import { USER_TOKEN_NAME } from "../../consts";
 import { getLocalStorage, setLocalStorage } from "@/utils";
 import { errorsHandler } from "./errorsHandler";
 import { notificationHandler } from "./notificationHandler";
-import { SUCCESS_MESSAGE_CODES } from "../../consts/success";
 
-function setUserToken(response) {
-  const { data } = response;
-  const STATUS_CREATED = 201;
+function responseHandler(response) {
+  const { data: body } = response;
 
-  if (data.token) {
-    setLocalStorage({ key: USER_TOKEN_NAME, data: response.data.token });
+  if (body.token) {
+    response.data = { user: body.user };
+    setLocalStorage({ key: USER_TOKEN_NAME, data: body.token });
   }
 
-  if (response.status === STATUS_CREATED && !data.message) {
-    notificationHandler([SUCCESS_MESSAGE_CODES.CREATED]);
+  if (body.message) {
+    notificationHandler(body.message);
   }
 
-  if (data.message) {
-    notificationHandler(data.message);
+  if (body.data && !body.length) {
+    response.data = body.data;
+  }
+
+  if (body.data && body.length) {
+    response.data = body;
   }
 
   return response;
@@ -33,7 +36,7 @@ function AuthorizationTokenHeader(request) {
 }
 
 function interceptors(axios) {
-  axios.interceptors.response.use(setUserToken, errorsHandler);
+  axios.interceptors.response.use(responseHandler, errorsHandler);
   axios.interceptors.request.use(AuthorizationTokenHeader);
 }
 

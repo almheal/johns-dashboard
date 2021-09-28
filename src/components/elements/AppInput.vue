@@ -1,25 +1,40 @@
 <template>
   <div class="input-wrapper">
-    <label :for="dynamicId" class="input__label">{{ label }}</label>
+    <label :for="dynamicId" class="input__label" data-test="label" v-if="label"
+      >{{ label }}<span class="input__required" v-if="required">*</span></label
+    >
     <input
-      :type="typeInput"
       class="input"
-      :id="dynamicId"
+      data-test="input"
+      :class="{ error: error }"
+      :type="typeInput"
       :value="modelValue"
       :placeholder="placeholder"
-      @input="$emit('update:modelValue', $event.target.value)"
+      :id="dynamicId"
+      @input="inputHandler"
     />
-    <div class="input__error" v-if="error">{{ error }}</div>
+    <div class="input__error" data-test="error" v-if="error">
+      {{ error }}
+    </div>
   </div>
 </template>
 
 <script>
+import {
+  setDynamicItemLocalStorage,
+  getDynamicPropertyLocalStorage,
+} from "@/utils";
+
 export default {
   name: "AppInput",
   props: {
     modelValue: {
       type: String,
       default: "",
+    },
+    required: {
+      type: Boolean,
+      default: false,
     },
     label: {
       type: String,
@@ -37,12 +52,58 @@ export default {
       type: String,
       default: "",
     },
+    saveKey: {
+      type: String,
+      default: "",
+    },
+    saveProperty: {
+      type: String,
+      default: "",
+    },
+    isSaved: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     dynamicId() {
       const id = (Date.now() * Math.random()) / Math.random();
       return id;
     },
+  },
+  watch: {
+    modelValue(value) {
+      if (this.saveKey && this.saveProperty && this.isSaved) {
+        setDynamicItemLocalStorage({
+          key: this.saveKey,
+          property: this.saveProperty,
+          data: value,
+        });
+      }
+    },
+  },
+  methods: {
+    inputHandler(e) {
+      this.$emit("update:modelValue", e.target.value);
+      if (this.saveKey && this.saveProperty && this.isSaved) {
+        setDynamicItemLocalStorage({
+          key: this.saveKey,
+          property: this.saveProperty,
+          data: e.target.value,
+        });
+      }
+    },
+  },
+  mounted() {
+    if (this.saveKey && this.saveProperty && this.isSaved) {
+      this.$emit(
+        "update:modelValue",
+        getDynamicPropertyLocalStorage({
+          key: this.saveKey,
+          property: this.saveProperty,
+        })
+      );
+    }
   },
 };
 </script>
@@ -53,7 +114,7 @@ export default {
 }
 
 .input {
-  display: block;
+  display: inline-block;
   font-size: 16px;
   width: 100%;
   padding: 10px;
@@ -65,6 +126,14 @@ export default {
     border-color: rgb(79, 70, 229);
     box-shadow: 0px 0px 0px 3px rgba(99, 102, 241, 0.4);
     transition: 0.2s;
+  }
+
+  &.error {
+    box-shadow: 0px 0px 0px 3px rgba(#c21313, 0.4);
+  }
+
+  &__required {
+    color: #c21313;
   }
 
   &__label {
