@@ -10,6 +10,18 @@ const routes = [
     component: () => import("../views/Home"),
   },
   {
+    path: "/products",
+    name: "Products",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/Products"),
+  },
+  {
+    path: "/products/:action",
+    name: "Product",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/Product"),
+  },
+  {
     path: "/categories",
     name: "Categories",
     meta: { layout: "DefaultLayout", auth: true },

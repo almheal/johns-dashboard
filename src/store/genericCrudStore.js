@@ -127,7 +127,6 @@ const genericCrudStore = (url) => {
             const updatedItems = items.filter((item) => item._id !== data._id);
             commit("setItems", updatedItems);
           }
-          commit("calculateAllItemsLength", { operation: "-", value: 1 });
           return data;
         } catch (messageCodes) {
           return { messageCodes };

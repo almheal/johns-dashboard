@@ -175,6 +175,11 @@ export default {
         return acc;
       }, true);
     },
+    async deleteItemHandler() {
+      await this.deleteItem({ id: this.deleteItemId });
+      this.getTagsByLimit();
+      this.closeModal();
+    },
     editTagHandler({ item }) {
       this.editItemId = item._id;
       this.tag.title = item.title;
@@ -202,10 +207,6 @@ export default {
 
 <style lang="scss" scoped>
 .tags {
-  &__title {
-    font-size: 24px;
-  }
-
   &__inner {
     display: flex;
     flex-direction: column;

@@ -117,11 +117,6 @@ export default {
     margin-bottom: 10px;
   }
 
-  &__title {
-    font-size: 21px;
-    font-weight: 500;
-  }
-
   &__body {
     height: 100%;
   }

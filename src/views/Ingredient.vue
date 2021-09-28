@@ -199,7 +199,6 @@ export default {
 <style lang="scss" scoped>
 .ingredient {
   &__title {
-    font-size: 24px;
     margin-bottom: 10px;
   }
 

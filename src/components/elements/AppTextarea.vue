@@ -1,19 +1,16 @@
 <template>
-  <div class="input-wrapper">
-    <label :for="dynamicId" class="input__label" data-test="label" v-if="label"
-      >{{ label }}<span class="input__required" v-if="required">*</span></label
-    >
-    <input
-      class="input"
-      data-test="input"
-      :class="{ error: error }"
-      :type="typeInput"
-      :value="modelValue"
-      :placeholder="placeholder"
+  <div class="textarea__wrapper">
+    <label :for="dynamicId" class="app-textarea__label" v-if="label">
+      {{ label }}
+    </label>
+    <textarea
+      class="app-textarea"
       :id="dynamicId"
-      @input="inputHandler"
-    />
-    <div class="input__error" data-test="error" v-if="error">
+      :placeholder="placeholder"
+      :value="modelValue"
+      @input="textareaHandler"
+    ></textarea>
+    <div class="app-textarea__error" v-if="error">
       {{ error }}
     </div>
   </div>
@@ -26,25 +23,17 @@ import {
 } from "@/utils";
 
 export default {
-  name: "AppInput",
+  name: "AppTextarea",
   props: {
-    modelValue: {
-      type: String,
-      default: "",
-    },
-    required: {
-      type: Boolean,
-      default: false,
-    },
     label: {
       type: String,
       default: "",
     },
-    typeInput: {
-      type: String,
-      default: "text",
-    },
     placeholder: {
+      type: String,
+      default: "",
+    },
+    modelValue: {
       type: String,
       default: "",
     },
@@ -67,7 +56,7 @@ export default {
   },
   computed: {
     dynamicId() {
-      const id = (Date.now() * Math.random()) / Math.random();
+      const id = Math.floor((Date.now() * Math.random()) / Math.random());
       return id;
     },
   },
@@ -83,7 +72,7 @@ export default {
     },
   },
   methods: {
-    inputHandler(e) {
+    textareaHandler(e) {
       this.$emit("update:modelValue", e.target.value);
       if (this.saveKey && this.saveProperty && this.isSaved) {
         setDynamicItemLocalStorage({
@@ -109,17 +98,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.input-wrapper {
+.textarea-wrapper {
   padding: 10px 0;
 }
 
-.input {
+.app-textarea {
   display: inline-block;
   font-size: 16px;
   width: 100%;
   padding: 10px;
   border-radius: 6px;
   border: 1px solid rgb(229, 231, 235);
+  resize: vertical;
+  max-height: 300px;
+  min-height: 100px;
+  // vertical-align: middle;
   transition: 0.2s;
 
   &:focus {
@@ -128,16 +121,8 @@ export default {
     transition: 0.2s;
   }
 
-  &.error {
-    box-shadow: 0px 0px 0px 3px rgba(#c21313, 0.4);
-  }
-
-  &__required {
-    color: #c21313;
-  }
-
   &__label {
-    display: inline-block;
+    display: block;
     margin-bottom: 7px;
   }
 

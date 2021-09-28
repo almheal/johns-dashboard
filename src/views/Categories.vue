@@ -174,6 +174,10 @@ export default {
         return acc;
       }, true);
     },
+    async deleteItemHandler() {
+      await this.deleteItem({ id: this.deleteItemId });
+      this.closeModal();
+    },
     editCategoryHandler({ item }) {
       this.category.title = item.title;
       this.category.icon = item.icon;
