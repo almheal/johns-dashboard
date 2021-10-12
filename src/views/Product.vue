@@ -33,7 +33,11 @@
                 "
                 :error="$t(errors.category)"
                 :selectedItem="product.category"
-                @selectItem="(category) => (product.category = category)"
+                @selectItem="
+                  (category) => (
+                    (product.category = category), (errors.category = '')
+                  )
+                "
               />
               <app-dropdown
                 class="product-form__dropdown"
@@ -97,8 +101,10 @@
             :number="index + 1"
             :id="option.id"
             :imgError="$t(errors.img[option.id] || '')"
+            :previewImgVariety="option.previewImg"
             v-model:optionVariety="option.variety"
             v-model:optionImg="option.img"
+            @previewVariety="(value) => (option.previewImg = value)"
             @update:optionImg="errors.img[option.id] = ''"
             @removeVariety="removeVarietyHandler"
             @input="optionsSaveLocaleStorage"
@@ -196,6 +202,7 @@ export default {
     defaultOption: {
       variety: "",
       img: "",
+      previewImg: "",
       sizes: [],
     },
     defaultSize: {
@@ -365,7 +372,7 @@ export default {
         this.errors.title = `errors.${ERRORS_MESSAGE_CODES.PRODUCT_TITLE_EMPTY}`;
         isValid = false;
       }
-      if (!this.product.category) {
+      if (!this.product.category || !this.product.category._id) {
         this.errors.category = `errors.${ERRORS_MESSAGE_CODES.PRODUCT_CATEGORY_EMPTY}`;
         isValid = false;
       }
@@ -390,8 +397,6 @@ export default {
           }
         }
       });
-      console.log(this.errors);
-      console.log(this.product);
       return isValid;
     },
     // remove variety by id
