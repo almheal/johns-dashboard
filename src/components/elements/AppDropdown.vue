@@ -1,5 +1,5 @@
 <template>
-  <div class="app-dropdown" :class="{ 'full-width': fullWidth }">
+  <div class="app-dropdown" :class="{ 'full-width': fullWidth, error: error }">
     <div class="app-dropdown__placeholder" @click="toggleDropdown">
       {{
         multiSelect
@@ -22,6 +22,7 @@
         </li>
       </ul>
     </div>
+    <div class="app-dropdown__error" v-if="error">{{ error }}</div>
   </div>
 </template>
 
@@ -77,8 +78,12 @@ export default {
     },
     isSaved: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
+    error: {
+      type: String,
+      default: "",
+    },
   },
   data: () => ({
     isShow: false,
@@ -175,7 +180,15 @@ export default {
 <style lang="scss" scoped>
 .app-dropdown {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   font-size: 16px;
+
+  &.error {
+    .app-dropdown__placeholder {
+      box-shadow: 0px 0px 0px 2px rgba(#c21313, 0.4);
+    }
+  }
 
   &.full-width {
     .app-dropdown__placeholder {
@@ -248,6 +261,11 @@ export default {
     &_multi-is-active {
       background-color: #e5e7eb;
     }
+  }
+
+  &__error {
+    margin: 7px 0;
+    color: #c21313;
   }
 }
 </style>
