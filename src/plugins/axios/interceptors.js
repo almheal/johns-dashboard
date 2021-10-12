@@ -11,7 +11,7 @@ function responseHandler(response) {
     setLocalStorage({ key: USER_TOKEN_NAME, data: body.accessToken });
   }
 
-  if (body.message) {
+  if (body.message && response.status !== 403) {
     notificationHandler(body.message);
   }
 

@@ -88,6 +88,11 @@ export default {
           JSON.parse(this.getCurrentLocaleMessages.messages)
         );
       }
+
+      this.messages = this.formatMessages(this.messages);
+    },
+    formatMessages(messages) {
+      return JSON.stringify(JSON.parse(messages), null, 2);
     },
   },
   async mounted() {
@@ -95,11 +100,7 @@ export default {
       await this.getLocaleMessages({ id: this.$route.params.id });
     }
     this.messages = this.getCurrentLocaleMessages
-      ? JSON.stringify(
-          JSON.parse(this.getCurrentLocaleMessages.messages),
-          null,
-          2
-        )
+      ? this.formatMessages(this.getCurrentLocaleMessages.messages)
       : "{}";
   },
 };

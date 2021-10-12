@@ -101,7 +101,7 @@
             :number="index + 1"
             :id="option.id"
             :imgError="$t(errors.img[option.id] || '')"
-            :previewImgVariety="option.previewImg"
+            :previewImgVariety="option.previewImg || option.img"
             v-model:optionVariety="option.variety"
             v-model:optionImg="option.img"
             @previewVariety="(value) => (option.previewImg = value)"
@@ -281,7 +281,7 @@ export default {
           this.resetProductToDefault();
         }
       } else {
-        this.updateProduct({ body: product, id: product._id });
+        await this.updateProduct({ body: product, id: product._id });
       }
 
       this.createAndUpdateLoader = false;
@@ -302,24 +302,32 @@ export default {
     takeIdsFromArray(array) {
       return array.map((item) => item._id);
     },
-    copyProductForEdit() {
-      // const copyProduct = JSON.parse(JSON.stringify(product));
-      // copyProduct.options = copyProduct.options.map((option) => {
-      //   for (let i = 0; i < option.sizes.length; i++) {
-      //     option.sizes[i] = {
-      //       ...option.sizes[i],
-      //       id: this.generateId(),
-      //     };
-      //   }
-      //   return {
-      //     ...option,
-      //     id: this.generateId(),
-      //   };
-      // });
-      // this.product = copyProduct;
+    copyProductForEdit(product) {
+      const copyProduct = JSON.parse(JSON.stringify(product));
+      const copyDefaultSize = JSON.parse(JSON.stringify(this.defaultSize));
+      const copyDefaultOption = JSON.parse(JSON.stringify(this.defaultOption));
+
+      copyProduct.options = copyProduct.options.map((option) => {
+        for (let i = 0; i < option.sizes.length; i++) {
+          option.sizes[i] = {
+            ...copyDefaultSize,
+            ...option.sizes[i],
+            id: this.generateId(),
+          };
+        }
+        return {
+          ...copyDefaultOption,
+          ...option,
+          id: this.generateId(),
+        };
+      });
+      this.product = copyProduct;
     },
     // save product options to local storage
     optionsSaveLocaleStorage() {
+      if (this.getRouteAction === "edit") {
+        return;
+      }
       const copyProduct = JSON.parse(JSON.stringify(this.product));
 
       // resetting pictures because after converting the file to a string, an empty object remains
