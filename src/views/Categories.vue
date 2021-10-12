@@ -28,7 +28,7 @@
           :text="
             editCategoryId ? $t('admin.utils.edit') : $t('admin.utils.add')
           "
-          :loading="createLoader || updateLoader"
+          :loading="loader"
         />
         <app-button
           class="categories__button"
@@ -89,14 +89,13 @@ export default {
       title: "",
       icon: "",
     },
+    loader: false,
     iconUrl: "",
     categoryPreviewImg: "",
     editCategoryId: null,
   }),
   computed: {
     ...mapState({
-      createLoader: (state) => state.category.createLoader,
-      updateLoader: (state) => state.category.updateLoader,
       deleteLoader: (state) => state.category.deleteLoader,
       getItemsLoader: (state) => state.category.getItemsLoader,
       getCategories: (state) => state.category.items,
@@ -140,6 +139,8 @@ export default {
         return;
       }
 
+      this.loader = true;
+
       try {
         if (typeof this.category.icon === "object") {
           const { data: imgUrl } = await requestCreateImage(this.category.icon);
@@ -158,6 +159,8 @@ export default {
         this.resetCategory();
       } catch (err) {
         console.log(err);
+      } finally {
+        this.loader = false;
       }
     },
     validate() {
@@ -173,6 +176,10 @@ export default {
         }
         return acc;
       }, true);
+    },
+    async deleteItemHandler() {
+      await this.deleteItem({ id: this.deleteItemId });
+      this.closeModal();
     },
     editCategoryHandler({ item }) {
       this.category.title = item.title;

@@ -29,7 +29,7 @@
               ? `${$t('admin.utils.edit')}`
               : `${$t('admin.utils.add')}`
           "
-          :loading="createLoader || updateLoader"
+          :loading="loader"
           buttonType="submit"
         />
         <app-button
@@ -102,6 +102,7 @@ export default {
       title: "",
       icon: "",
     },
+    loader: false,
     DEFAULT_LIMIT: 10,
     uploadFileIsClear: false,
     featureImgPreview: "",
@@ -109,9 +110,7 @@ export default {
   }),
   computed: {
     ...mapState({
-      createLoader: (state) => state.feature.createLoader,
       deleteLoader: (state) => state.feature.deleteLoader,
-      updateLoader: (state) => state.feature.updateLoader,
       getItemsLoader: (state) => state.feature.getItemsLoader,
       featuresAllLength: (state) => state.feature.lengthAllItems,
       getFeatures: (state) => state.feature.items,
@@ -161,6 +160,8 @@ export default {
         return;
       }
 
+      this.loader = true;
+
       try {
         if (typeof this.feature.icon === "object") {
           const { data: imgUrl } = await requestCreateImage(this.feature.icon);
@@ -180,6 +181,8 @@ export default {
         this.resetFeature();
       } catch (err) {
         console.log(err);
+      } finally {
+        this.loader = false;
       }
     },
     validate() {
@@ -200,6 +203,11 @@ export default {
       this.feature.icon = item.icon;
       this.featureImgPreview = item.icon;
       this.editFeatureId = item._id;
+    },
+    async deleteItemHandler() {
+      await this.deleteItem({ id: this.deleteItemId });
+      this.getFeaturesByLimit();
+      this.closeModal();
     },
     getFeaturesByLimit() {
       const { skip, limit } = calculatePagination({
@@ -232,10 +240,6 @@ export default {
     height: 100%;
     display: flex;
     flex-direction: column;
-  }
-
-  &__title {
-    font-size: 24px;
   }
 
   &__form {

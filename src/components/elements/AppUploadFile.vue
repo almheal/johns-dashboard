@@ -1,8 +1,9 @@
 <template>
   <div class="app-upload">
-    <label class="app-upload__label" :for="dynamicId" v-if="label">{{
-      label
-    }}</label>
+    <label class="app-upload__label" :for="dynamicId" v-if="label"
+      >{{ label
+      }}<span class="app-upload__required" v-if="required">*</span></label
+    >
     <app-button
       class="app-upload__button"
       :class="{ 'app-upload__button_margin-bottom': error }"
@@ -42,6 +43,10 @@ export default {
     modelValue: {
       type: String,
       default: "",
+    },
+    required: {
+      type: Boolean,
+      default: false,
     },
   },
   methods: {
@@ -86,6 +91,10 @@ export default {
     &_margin-bottom {
       margin-bottom: 10px;
     }
+  }
+
+  &__required {
+    color: #c21313;
   }
 
   &__input {

@@ -81,7 +81,7 @@ export default {
           item: ingredient,
           cells: [
             {
-              title: ingredient.title,
+              title: this.$t(ingredient.title),
             },
             {
               title: ingredient.price,
@@ -90,7 +90,7 @@ export default {
               img: ingredient.icon,
             },
             {
-              title: ingredient.category,
+              title: this.$t(ingredient.category),
             },
           ],
         };
@@ -102,6 +102,11 @@ export default {
       getAllIngredients: "ingredient/getAllItems",
       deleteItem: "ingredient/deleteItem",
     }),
+    async deleteItemHandler() {
+      await this.deleteItem({ id: this.deleteItemId });
+      this.getIngredientsByLimit();
+      this.closeModal();
+    },
     async getIngredientsByLimit() {
       const { skip, limit } = calculatePagination({
         limit: this.DEFAULT_LIMIT,
@@ -126,10 +131,6 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100%;
-  }
-
-  &__title {
-    font-size: 24px;
   }
 
   &__header {

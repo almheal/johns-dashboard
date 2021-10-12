@@ -52,7 +52,7 @@
               ? $t('admin.utils.create')
               : $t('admin.utils.edit')
           "
-          :loading="oneFeatureLoader || createLoader || updateLoader"
+          :loading="loader"
           buttonType="submit"
         />
       </form>
@@ -89,14 +89,12 @@ export default {
       icon: "",
       category: "",
     },
+    loader: false,
     iconUrl: "",
     previewImgIngredient: "",
   }),
   computed: {
     ...mapState({
-      oneFeatureLoader: (state) => state.ingredient.getItemLoader,
-      createLoader: (state) => state.ingredient.createLoader,
-      updateLoader: (state) => state.ingredient.updateLoader,
       getIngredient: (state) => state.ingredient.item,
     }),
     getRouteAction() {
@@ -117,6 +115,9 @@ export default {
       if (!isValid) {
         return;
       }
+
+      this.loader = true;
+
       try {
         if (typeof this.ingredient.icon === "object") {
           const { data: imgUrl } = await requestCreateImage(
@@ -141,6 +142,8 @@ export default {
         }
       } catch (err) {
         console.log(err);
+      } finally {
+        this.loader = false;
       }
     },
     changeIcon(formData) {
@@ -182,7 +185,7 @@ export default {
     }
 
     if (this.getRouteAction === "edit" && this.getEditId) {
-      this.isLoading = true;
+      this.loader = true;
       await this.getOneIngredient({
         id: this.getEditId,
         addNew: false,
@@ -190,7 +193,7 @@ export default {
       });
       this.ingredient = JSON.parse(JSON.stringify(this.getIngredient));
       this.previewImgIngredient = this.ingredient.icon;
-      this.isLoading = false;
+      this.loader = false;
     }
   },
 };
@@ -199,7 +202,6 @@ export default {
 <style lang="scss" scoped>
 .ingredient {
   &__title {
-    font-size: 24px;
     margin-bottom: 10px;
   }
 
