@@ -21,7 +21,7 @@
             :error="imgError"
             :required="true"
             @changeFile="changeImg"
-            @preview="(preview) => (previewImgVariety = preview)"
+            @preview="$emit('previewVariety', $event)"
             @update:modelValue="$emit('update:imgUrl', $event)"
           />
           <div class="variety__preview">
@@ -76,10 +76,11 @@ export default {
       type: [String, Number],
       default: 0,
     },
+    previewImgVariety: {
+      type: String,
+      default: "",
+    },
   },
-  data: () => ({
-    previewImgVariety: "",
-  }),
   methods: {
     changeImg(formData) {
       this.$emit("update:optionImg", formData);

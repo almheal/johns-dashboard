@@ -171,6 +171,7 @@ export default {
         property: this.saveProperty,
         defaultValue: this.multiSelect ? [] : "",
       });
+      console.log(value);
       this.$emit("selectItem", value);
     }
   },
