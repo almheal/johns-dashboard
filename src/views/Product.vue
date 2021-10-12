@@ -31,6 +31,7 @@
                 :toShow="
                   (category) => (category?.title ? $t(category.title) : '')
                 "
+                :error="$t(errors.category)"
                 :selectedItem="product.category"
                 @selectItem="(category) => (product.category = category)"
               />
@@ -92,7 +93,7 @@
           <product-variety
             v-for="(option, index) in product.options"
             :key="index"
-            :option="option"
+            :optionVariety="option.variety"
             :number="index + 1"
             :id="option.id"
             :imgError="$t(errors.img[option.id] || '')"
@@ -214,6 +215,7 @@ export default {
     },
     errors: {
       title: "",
+      category: "",
       price: {},
       img: {},
     },
@@ -363,6 +365,10 @@ export default {
         this.errors.title = `errors.${ERRORS_MESSAGE_CODES.PRODUCT_TITLE_EMPTY}`;
         isValid = false;
       }
+      if (!this.product.category) {
+        this.errors.category = `errors.${ERRORS_MESSAGE_CODES.PRODUCT_CATEGORY_EMPTY}`;
+        isValid = false;
+      }
       this.product.options.forEach((option) => {
         if (!option.img) {
           this.errors.img[
@@ -384,6 +390,8 @@ export default {
           }
         }
       });
+      console.log(this.errors);
+      console.log(this.product);
       return isValid;
     },
     // remove variety by id

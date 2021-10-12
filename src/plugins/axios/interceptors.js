@@ -6,9 +6,9 @@ import { notificationHandler } from "./notificationHandler";
 function responseHandler(response) {
   const { data: body } = response;
 
-  if (body.token) {
+  if (body.accessToken) {
     response.data = { user: body.user };
-    setLocalStorage({ key: USER_TOKEN_NAME, data: body.token });
+    setLocalStorage({ key: USER_TOKEN_NAME, data: body.accessToken });
   }
 
   if (body.message) {
