@@ -64,6 +64,18 @@ const routes = [
     component: () => import("../views/Features"),
   },
   {
+    path: "/promo-codes",
+    name: "PromoCodes",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/PromoCodes"),
+  },
+  {
+    path: "/promo-code/:action",
+    name: "PromoCode",
+    meta: { layout: "DefaultLayout", auth: true },
+    component: () => import("../views/PromoCode"),
+  },
+  {
     path: "/login",
     name: "Login",
     meta: { layout: "EmptyLayout", auth: false },

@@ -43,24 +43,6 @@ export const resetObjProperties = (obj) => {
   }, {});
 };
 
-export const copyObjectByExistingProperties = (obj, target) => {
-  return Object.keys(obj).reduce((acc, key) => {
-    if (target[key] && target[key].__proto__ === Object.prototype) {
-      acc[key] = copyObjectByExistingProperties(obj[key], target[key]);
-    } else if (target[key] && Array.isArray(target[key])) {
-      acc[key] = target[key].map((item) => {
-        if (item.__proto__ === Object.prototype) {
-          return copyObjectByExistingProperties(item);
-        } else {
-          return item;
-        }
-      });
-    }
-
-    return acc;
-  }, {});
-};
-
 export const calculatePagination = ({ limit, page }) => {
   if (page < 1 || !page) {
     page = 1;

@@ -78,10 +78,13 @@ const genericCrudStore = (url) => {
           commit("setLoader", { property: "getItemsLoader", value: false });
         }
       },
-      async getItem({ commit }, { id, addNew = true, setItem = false }) {
+      async getItem(
+        { commit },
+        { id = "", addNew = true, setItem = false, query }
+      ) {
         try {
           commit("setLoader", { property: "getItemLoader", value: true });
-          const { data } = await service.get(id);
+          const { data } = await service.get(id, query);
           if (addNew) {
             commit("addNewItem", data);
           }
