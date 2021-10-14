@@ -1,7 +1,15 @@
 <template>
   <div class="product">
     <div class="product__inner">
-      <h1 class="product__title">{{ $t("admin.product.creation") }}</h1>
+      <h1 class="product__title">
+        {{
+          $t(
+            `admin.product.${
+              getRouteAction === "edit" ? "editing" : "creation"
+            }`
+          )
+        }}
+      </h1>
       <div class="product__body">
         <form
           class="product-form"

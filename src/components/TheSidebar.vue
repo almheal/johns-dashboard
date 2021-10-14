@@ -59,6 +59,11 @@ export default {
         link: "/tags",
       },
       {
+        name: "admin.menu.promoCodes",
+        icon: "AppDiscountIcon",
+        link: "/promo-codes",
+      },
+      {
         name: "admin.menu.locales",
         link: "/locales",
         icon: "AppTranslationIcon",
