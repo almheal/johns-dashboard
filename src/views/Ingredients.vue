@@ -81,7 +81,7 @@ export default {
           item: ingredient,
           cells: [
             {
-              title: ingredient.title,
+              title: this.$t(ingredient.title),
             },
             {
               title: ingredient.price,
@@ -90,7 +90,7 @@ export default {
               img: ingredient.icon,
             },
             {
-              title: ingredient.category,
+              title: this.$t(ingredient.category),
             },
           ],
         };

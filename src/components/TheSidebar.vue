@@ -59,6 +59,11 @@ export default {
         link: "/tags",
       },
       {
+        name: "admin.menu.promoCodes",
+        icon: "AppDiscountIcon",
+        link: "/promo-codes",
+      },
+      {
         name: "admin.menu.locales",
         link: "/locales",
         icon: "AppTranslationIcon",
@@ -81,7 +86,6 @@ export default {
   top: 0;
   background-color: rgb(17, 24, 39);
   width: 256px;
-  height: 100vh;
 
   &__inner {
     display: flex;
