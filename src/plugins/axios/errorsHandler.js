@@ -22,6 +22,9 @@ export const errorsHandler = (err) => {
     setLocalStorage({ key: USER_TOKEN_NAME, data: "" });
   }
 
-  notificationHandler(message, true);
+  if (!message.includes(ERRORS_MESSAGE_CODES.USER_NOT_AUTHORIZED)) {
+    notificationHandler(message, true);
+  }
+
   return Promise.reject(message);
 };

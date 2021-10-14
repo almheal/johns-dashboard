@@ -81,7 +81,6 @@ export default {
   top: 0;
   background-color: rgb(17, 24, 39);
   width: 256px;
-  height: 100vh;
 
   &__inner {
     display: flex;

@@ -6,7 +6,7 @@
     <input
       class="input"
       data-test="input"
-      :class="{ error: error }"
+      :class="{ error: error || isError }"
       :type="typeInput"
       :value="modelValue"
       :placeholder="placeholder"
@@ -61,6 +61,10 @@ export default {
       default: "",
     },
     isSaved: {
+      type: Boolean,
+      default: false,
+    },
+    isError: {
       type: Boolean,
       default: false,
     },
