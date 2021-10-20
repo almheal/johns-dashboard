@@ -26,7 +26,7 @@ const actions = {
     try {
       commit("setLoading", true);
       const { data } = await loginUser(body);
-      setLocalStorage({ key: ROLES_NAME, data: data.roles });
+      setLocalStorage({ key: ROLES_NAME, data: data.user.roles || [] });
       commit("setUser", data.user);
     } catch (messageCodes) {
       return { messageCodes };
@@ -37,7 +37,7 @@ const actions = {
   async auth({ commit }) {
     try {
       const { data } = await authUser();
-      setLocalStorage({ key: ROLES_NAME, data: data.roles });
+      setLocalStorage({ key: ROLES_NAME, data: data?.roles || [] });
       commit("setUser", data);
     } catch (messageCodes) {
       return { messageCodes };
