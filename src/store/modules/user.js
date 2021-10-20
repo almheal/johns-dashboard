@@ -1,4 +1,6 @@
 import { loginUser, authUser } from "@/services/auth.service";
+import { setLocalStorage } from "@/utils";
+import { ROLES_NAME } from "@/consts";
 
 const state = () => ({
   user: {},
@@ -24,6 +26,7 @@ const actions = {
     try {
       commit("setLoading", true);
       const { data } = await loginUser(body);
+      setLocalStorage({ key: ROLES_NAME, data: data.roles });
       commit("setUser", data.user);
     } catch (messageCodes) {
       return { messageCodes };
@@ -34,6 +37,7 @@ const actions = {
   async auth({ commit }) {
     try {
       const { data } = await authUser();
+      setLocalStorage({ key: ROLES_NAME, data: data.roles });
       commit("setUser", data);
     } catch (messageCodes) {
       return { messageCodes };
