@@ -159,8 +159,12 @@ export default {
           body: promoCodeForRequest,
         });
       } else {
-        await this.createPromoCode({ body: promoCodeForRequest });
+        await this.createPromoCode({
+          body: promoCodeForRequest,
+          addNew: false,
+        });
         this.promoCode = resetObjProperties(this.promoCode);
+        this.promoCode.percent = true;
       }
 
       this.loader = false;
