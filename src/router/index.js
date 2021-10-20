@@ -141,22 +141,27 @@ router.beforeEach((to, from, next) => {
   const isAuth = to.meta.auth;
   const token = getLocalStorage(USER_TOKEN_NAME);
   let rolesIsNext = true;
+  console.log(token);
 
   if (to.meta.roles) {
     const user = store.getters["user/getUser"];
     const userRoles = user.roles
       ? user.roles
       : getLocalStorage(ROLES_NAME) || [];
+    console.log("userRoles", userRoles);
+    console.log("user", user);
     rolesIsNext = to.meta.roles.find((role) => userRoles.includes(role));
+    console.log("rolesIsNext", rolesIsNext);
   }
 
+  console.log("rolesIsNext", rolesIsNext);
   if (isAuth) {
     if (!token) {
       next({
         name: "Login",
       });
     } else if (!rolesIsNext && token) {
-      next({ path: "/" });
+      next({ name: "Home" });
     } else {
       next();
     }
@@ -166,6 +171,7 @@ router.beforeEach((to, from, next) => {
       name: nextRouteName,
     });
   } else {
+    console.log("gg");
     next();
   }
 });
