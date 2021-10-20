@@ -20,6 +20,12 @@
           "
           @clickCross="openDeleteModal"
         />
+        <app-pagination
+          class="promo-codes__pagination"
+          :length="promoCodesAllLength"
+          :limit="DEFAULT_LIMIT"
+          @changePage="getPromoCodesByLimit"
+        />
       </div>
     </div>
     <app-information-modal
@@ -36,7 +42,9 @@
 import AppButton from "@/components/elements/AppButton";
 import AppTable from "@/components/elements/AppTable";
 import AppInformationModal from "@/components/elements/AppInformationModal";
+import AppPagination from "@/components/elements/AppPagination";
 import TableActionsMixin from "@/mixins/TableActionsMixin";
+import { calculatePagination } from "@/utils";
 import { mapActions, mapState } from "vuex";
 
 export default {
@@ -45,14 +53,22 @@ export default {
     AppButton,
     AppTable,
     AppInformationModal,
+    AppPagination,
   },
   mixins: [TableActionsMixin],
+  data: () => ({
+    DEFAULT_LIMIT: 15,
+  }),
   computed: {
     ...mapState({
       promoCodes: (state) => state.promoCode.items,
       deleteLoader: (state) => state.promoCode.deleteLoader,
       getItemsLoader: (state) => state.promoCode.getItemsLoader,
+      promoCodesAllLength: (state) => state.promoCode.lengthAllItems,
     }),
+    currentPage() {
+      return this.$route.query.page;
+    },
     columns() {
       return [
         {
@@ -119,7 +135,11 @@ export default {
       this.closeModal();
     },
     getPromoCodesByLimit() {
-      this.getAllPromoCodes();
+      const { skip, limit } = calculatePagination({
+        limit: this.DEFAULT_LIMIT,
+        page: this.currentPage,
+      });
+      this.getAllPromoCodes({ skip, limit });
     },
   },
   mounted() {
@@ -130,6 +150,12 @@ export default {
 
 <style lang="scss" scoped>
 .promo-codes {
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   &__title {
     font-size: 24px;
   }
@@ -145,6 +171,10 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+  }
+
+  &__pagination {
+    margin: 30px auto 0;
   }
 }
 </style>

@@ -6,7 +6,7 @@
           <img class="logo__img" src="../assets/img/logo.svg" alt="logo" />
           <h4 class="logo__title">Dashboard</h4>
         </router-link>
-        <navigation-menu :menu="menu" />
+        <navigation-menu :menu="getMenuByRole" />
         <dropdown-language class="sidebar__language" />
       </div>
       <button class="logout" @click="logout">{{ $t("admin.logout") }}</button>
@@ -19,6 +19,7 @@ import NavigationMenu from "@/components/NavigationMenu";
 import DropdownLanguage from "@/components/DropdownLanguage";
 import { setLocalStorage } from "@/utils";
 import { USER_TOKEN_NAME } from "@/consts";
+import { mapState } from "vuex";
 
 export default {
   name: "TheSidebar",
@@ -70,6 +71,26 @@ export default {
       },
     ],
   }),
+  computed: {
+    ...mapState({
+      user: (state) => state.user.user,
+    }),
+    appRoutes() {
+      return this.$router.getRoutes();
+    },
+    getMenuByRole() {
+      const menuByRoles = this.menu.filter((item) => {
+        const route = this.appRoutes.find((route) => route.path === item.link);
+        const isRole = route.meta.roles.find((role) =>
+          this.user.roles.includes(role)
+        );
+        if (isRole) {
+          return item;
+        }
+      });
+      return menuByRoles;
+    },
+  },
   methods: {
     logout() {
       setLocalStorage({ key: USER_TOKEN_NAME, data: "" });
