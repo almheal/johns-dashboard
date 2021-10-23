@@ -232,6 +232,8 @@ export default {
     z-index: 50;
     visibility: hidden;
     width: calc(100% + 2px);
+    max-height: 250px;
+    overflow: auto;
     border: 1px solid rgb(156, 163, 175);
     background-color: #fff;
     box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1);
