@@ -10,15 +10,24 @@
           class="pagination__arrow pagination__arrow_left"
         />
       </div>
-      <div
-        class="pagination__item"
-        v-for="(num, index) in pagesLength"
-        :key="index"
-        :class="{ active: String(num) === String(currentPage) }"
-        @click="changePage(num)"
-      >
-        {{ num }}
-      </div>
+      <template v-for="(num, index) in pagesLength" :key="index">
+        <div
+          class="pagination__item"
+          v-if="
+            !pagesIsMore ||
+            !index ||
+            num === pagesLength ||
+            num === Number(currentPage) + 1 ||
+            num === Number(currentPage) ||
+            num === Number(currentPage) - 1
+          "
+          :class="{ active: String(num) === String(currentPage) }"
+          @click="changePage(num)"
+        >
+          {{ num }}
+        </div>
+      </template>
+
       <div
         class="pagination__item pagination__item_icon"
         v-if="currentPage < pagesLength"
@@ -50,6 +59,9 @@ export default {
       default: LIMIT_ITEMS,
     },
   },
+  data: () => ({
+    pagesMoreValue: 10,
+  }),
   watch: {
     async length(value) {
       if (!(value % this.limit) && this.currentPage > 1) {
@@ -65,6 +77,9 @@ export default {
     },
     pagesLength() {
       return Math.ceil(this.length / this.limit);
+    },
+    pagesIsMore() {
+      return this.pagesLength > this.pagesMoreValue;
     },
   },
   methods: {
@@ -105,7 +120,7 @@ export default {
     padding: 8px 12px;
     margin-right: 10px;
     cursor: pointer;
-    transition: 0.3s;
+    user-select: none;
 
     &:last-child {
       border-right: 0;
