@@ -156,7 +156,7 @@ export default {
         return;
       }
 
-      this.$router.push(`/locale-messages/${item.messages}`);
+      this.$router.push(`/locale-messages/${item.messages._id}`);
     },
   },
 };

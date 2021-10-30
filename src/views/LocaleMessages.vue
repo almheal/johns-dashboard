@@ -84,7 +84,7 @@ export default {
     },
     routeLocale() {
       return this.getLocales.find(
-        (locale) => locale.messages === this.$route.params.id
+        (locale) => locale.messages._id === this.$route.params.id
       );
     },
   },
@@ -138,7 +138,7 @@ export default {
       });
 
       if (
-        this.getCurrentLocaleMessages._id === this.getCurrentLocale.messages
+        this.getCurrentLocaleMessages._id === this.getCurrentLocale.messages._id
       ) {
         this.$i18n.setLocaleMessage(
           this.getCurrentLocale.title,
@@ -146,6 +146,8 @@ export default {
         );
       }
 
+      this.value = "";
+      this.nestingPath = "";
       this.messages = this.formatMessages(messages);
     },
     validateForm() {

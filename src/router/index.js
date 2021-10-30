@@ -166,7 +166,6 @@ router.beforeEach((to, from, next) => {
       name: nextRouteName,
     });
   } else {
-    console.log("gg");
     next();
   }
 });
