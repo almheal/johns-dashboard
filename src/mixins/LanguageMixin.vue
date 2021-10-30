@@ -14,7 +14,7 @@ export default {
     currentLocaleMessages() {
       return this.getAllLocaleMessages.find(
         (localeMessages) =>
-          localeMessages._id === this.getCurrentLocale.messages
+          localeMessages._id === this.getCurrentLocale.messages._id
       );
     },
   },
@@ -55,7 +55,7 @@ export default {
       }
 
       if (!this.currentLocaleMessages) {
-        await this.getLocaleMessages({ id: locale.messages });
+        await this.getLocaleMessages({ id: locale.messages._id });
       }
 
       this.$i18n.locale = this.getCurrentLocale.title;
