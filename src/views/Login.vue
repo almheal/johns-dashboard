@@ -9,6 +9,7 @@
             <app-input
               :label="$t('admin.login.username')"
               :error="$t(errors.name)"
+              :disabled="disabled"
               v-model="user.name"
               @update:modelValue="errors.name = ''"
             />
@@ -16,6 +17,7 @@
               typeInput="password"
               :label="$t('admin.login.password')"
               :error="$t(errors.password)"
+              :disabled="disabled"
               v-model="user.password"
               @update:modelValue="errors.password = ''"
             />
@@ -24,8 +26,9 @@
             <dropdown-language />
             <app-button
               class="login-form__button"
-              :text="$t('admin.login.login')"
               buttonType="submit"
+              :disabled="disabled"
+              :text="$t('admin.login.login')"
               :loading="getLoader"
             />
           </div>
@@ -39,6 +42,7 @@
 import AppInput from "@/components/elements/AppInput";
 import AppButton from "@/components/elements/AppButton";
 import DropdownLanguage from "@/components/DropdownLanguage";
+import { TEST_USER } from "@/consts";
 import { ERRORS_MESSAGE_CODES } from "@/consts/errors";
 import { mapActions, mapGetters } from "vuex";
 
@@ -58,6 +62,7 @@ export default {
       name: "",
       password: "",
     },
+    disabled: false,
   }),
   computed: {
     ...mapGetters({
@@ -67,6 +72,7 @@ export default {
   methods: {
     ...mapActions({
       login: "user/login",
+      testUserLogin: "user/testUserLogin",
     }),
     validate(user) {
       let isValid = true;
@@ -97,6 +103,38 @@ export default {
       }
       this.$router.push("/");
     },
+
+    async redirectTestUser() {
+      await this.testUserLogin();
+      this.$router.push(this.$route.query.to);
+    },
+
+    fillTestUser() {
+      let index = 0;
+      this.disabled = true;
+      const splitName = TEST_USER.name.split("");
+      const splitPassword = TEST_USER.password.split("");
+
+      const interval = setInterval(async () => {
+        const { name, password } = this.user;
+
+        if (name === TEST_USER.name && password === TEST_USER.password) {
+          clearInterval(interval);
+          this.redirectTestUser();
+          return;
+        }
+
+        this.user.name += splitName[index] || "";
+        this.user.password += splitPassword[index] || "";
+        index++;
+      }, 50);
+    },
+  },
+
+  mounted() {
+    if (this.$route.query.testUser) {
+      this.fillTestUser();
+    }
   },
 };
 </script>

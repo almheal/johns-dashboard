@@ -1,6 +1,6 @@
 import { loginUser, authUser } from "@/services/auth.service";
 import { setLocalStorage } from "@/utils";
-import { ROLES_NAME } from "@/consts";
+import { ROLES_NAME, TEST_USER } from "@/consts";
 
 const state = () => ({
   user: {},
@@ -42,6 +42,9 @@ const actions = {
     } catch (messageCodes) {
       return { messageCodes };
     }
+  },
+  async testUserLogin({ dispatch }) {
+    await dispatch("login", TEST_USER);
   },
 };
 
