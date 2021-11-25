@@ -137,7 +137,7 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const isAuth = to.meta.auth;
   const token = getLocalStorage(USER_TOKEN_NAME);
   let rolesIsNext = true;
@@ -154,6 +154,7 @@ router.beforeEach((to, from, next) => {
     if (!token) {
       next({
         name: "Login",
+        query: to.query.testUser ? { testUser: true, to: to.path } : {},
       });
     } else if (!rolesIsNext && token) {
       next({ name: "Home" });
