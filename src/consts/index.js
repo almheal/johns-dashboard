@@ -9,3 +9,7 @@ export const ROLES = {
   EMPLOYEE: "employee",
   DEVELOPER: "developer",
 };
+export const TEST_USER = {
+  name: "test-admin",
+  password: "super-password",
+};

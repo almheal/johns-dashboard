@@ -11,6 +11,7 @@
       :value="modelValue"
       :placeholder="placeholder"
       :id="dynamicId"
+      :disabled="disabled"
       @input="inputHandler"
     />
     <div class="input__error" data-test="error" v-if="error">
@@ -65,6 +66,10 @@ export default {
       default: false,
     },
     isError: {
+      type: Boolean,
+      default: false,
+    },
+    disabled: {
       type: Boolean,
       default: false,
     },
