@@ -154,7 +154,7 @@ router.beforeEach(async (to, from, next) => {
     if (!token) {
       next({
         name: "Login",
-        query: to.query.testUser ? { testUser: true, to: to.path } : {},
+        query: to.query.testUser ? { testUser: true, to: to.fullPath } : {},
       });
     } else if (!rolesIsNext && token) {
       next({ name: "Home" });
