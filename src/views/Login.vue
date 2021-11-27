@@ -106,7 +106,7 @@ export default {
 
     async redirectTestUser() {
       await this.testUserLogin();
-      this.$router.push(this.$route.query.to);
+      this.$router.push(this.$route.query.to || "/");
     },
 
     fillTestUser() {
